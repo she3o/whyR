@@ -1,0 +1,61 @@
+$body-bg: #f4f1eb; // Light beige for a clean background
+$body-color: #3b3a30; // Dark charcoal for body text
+$link-color: #0066cc; // Vibrant blue for links, ensuring good contrast
+$presentation-heading-color: #b22222; // Deep red for headings to stand out without harshness
+$code-color: #fb5d42; // Dark navy for code for easy reading
+$code-block-bg: #e8e6df; // Light warm gray for subtle code block contrast
+$code-block-border-color: #4b4a48; // Medium gray for borders
+
+/*-- scss:rules --*/
+
+.reveal .slide-number {
+	color: $link-color;
+}
+
+.reveal .footer {
+	font-size: 0.35em !important;
+	text-align: right !important;
+}
+
+.reveal .slides section .fragment.semi-fade-out {
+	opacity: 1;
+	visibility: inherit;
+
+	&.visible {
+		opacity: 0.25;
+		visibility: inherit;
+	}
+}
+
+.sectionhead {
+	font-size: 1em;
+	text-align: center;
+	color: $presentation-heading-color;
+	font-family: $presentation-heading-font;
+	background-color: $body-bg;
+	margin: 1px;
+	padding: 2px;
+	width: 120px;
+	border-left: 10px solid;
+}
+
+.blackbox {
+	color: #000000;
+	background-color: transparent;
+	margin: 1px;
+	padding: 5px 2px 5px 2px;
+	height: 205px;
+	border: 2px solid;
+}
+
+.reveal .slides h2 {
+	margin: 12px 12px 30px 12px;
+}
+
+.reveal .slides p {
+	margin: 20px 12px 20px 12px;
+}
+
+.reveal .slides .Reactable {
+	background-color: $body-bg;
+}

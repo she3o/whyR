@@ -1,0 +1,1767 @@
+## Attribution
+These slides draw heavily from slides created by [@meghall06].
+
+## Outline
+
+<br>
+
+::: {.incremental}
+- What is R? 
+- Basic data manipulation in R
+- Using R effectively
+- More data manipulation
+- Visualizing data
+- Bioconductor
+- The analysis of expression data
+- A peek at advanced topics
+:::
+
+# What is R?
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+1 [2 3 4 5 6]{style="opacity:0.25"}
+:::
+:::
+
+---
+
+## What is R?
+
+::: {style="text-align: center"}
+R is an **open-source** scripting language and environment for working with data.
+
+Open-source means the software is free of charge. most importantly it means the we are **free** to inspect, use, modify and redistribute the software.
+:::
+
+---
+
+## What is R?
+
+The R language is the vehicle of choice for research in statistical methodology, bioinformatics research and pharmaceutical industry.
+
+---
+
+## Why Not Excel?
+
+::: {.incremental}
+- Limited Data Handling
+
+- Reproducibility Challenges
+
+- Basic Statistical Tools
+
+- Visualization Limitations
+
+- Prone to Human Errors
+
+- Lack of Automation
+
+- No Version Control
+
+- Insufficient Integration
+
+- Scalability Constraints
+
+- Security Concerns
+:::
+
+:::{.notes}
+- **Limited Data Handling:** Explain scenarios where Excel cannot manage the size of biomedical datasets.
+- **Reproducibility Challenges:** Discuss the importance of reproducible research and how Excel’s manual processes hinder this.
+- **Basic Statistical Tools:** Highlight the need for advanced statistical analyses in biomedical research that Excel cannot provide.
+- **Visualization Limitations:** Show examples of complex visualizations needed in research that are difficult to create in Excel.
+- **Prone to Human Errors:** Share instances where manual errors in Excel could lead to significant research inaccuracies.
+- **Lack of Automation:** Emphasize the time lost on repetitive tasks in Excel and the benefits of automation.
+- **Version Control Issues:** Illustrate the difficulties in tracking changes and collaborating using Excel.
+- **Insufficient Integration:** Explain the necessity of integrating with other research tools and databases, programming languages
+- **Scalability Constraints:** Discuss how research projects grow and Excel's limitations in scaling with them.
+- **Security Concerns:** Address the importance of data security in biomedical research and Excel’s shortcomings.
+:::
+
+---
+
+## Why R?
+
+::: {.incremental}
+- Reproducible Analysis
+
+- Handles Large & Complex Datasets
+
+- Advanced Statistical Tools
+
+- Superior Data Visualization
+
+- Data and code are separate
+
+- Automation & Efficiency
+
+- Extensive Package Ecosystem
+
+- Integration Capabilities
+
+- Scalability & Performance
+:::
+
+:::{.notes}
+- **Reproducible Analysis:** Demonstrate how R scripts can be reused and shared to ensure consistent results.
+- **Handles Large & Complex Datasets:** Compare R’s capacity to handle large datasets versus Excel’s limitations.
+- **Advanced Statistical Tools:** Provide examples of advanced statistical techniques available in R that are essential for biomedical research.
+- **Superior Data Visualization:** Showcase some high-quality visualizations created with `ggplot2` to illustrate R’s capabilities.
+- **Automation & Efficiency:** Explain how R can automate data processing tasks, reducing manual effort and errors.
+- **Extensive Package Ecosystem:** Highlight key R packages that are particularly useful in biomedical sciences.
+- **Active Community Support:** Mention resources like CRAN, Bioconductor, and community forums that support R users.
+- **Integration Capabilities:** Describe how R can interface with databases, other programming languages, and research tools.
+- **Scalability & Performance:** Discuss R’s ability to handle increasing data sizes and more complex analyses efficiently.
+- **Enhanced Security:** Talk about R’s options for securing data and managing access, which are critical in biomedical research.
+:::
+
+---
+
+## Getting R
+
+You need the [R language](https://cloud.r-project.org/)
+
+. . .
+
+And also [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
+
+---
+
+## Navigating RStudio
+
+![](images/RStudio1.webp)
+
+. . .
+
+::: {.absolute top="50%" left="10%"}
+::: {style="color: #cc0000"}
+code *can* go here
+:::
+:::
+
+---
+
+## Navigating RStudio
+
+![](images/RStudio2.webp)
+
+
+::: {.absolute top="35%" left="25%"}
+::: {style="color: #cc0000"}
+code can also<br>go here
+:::
+:::
+
+---
+
+## Using R
+
+::: columns
+::: {.column width="50%"}
+<br>
+<br>
+You use R via *packages*
+:::
+::: {.fragment}
+<br/>
+...which contain *functions*
+:::
+::: {.fragment}
+<br>
+...which are just *verbs*
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+![](tidyverse.png){.absolute top="70" left="530" height="574" width="499"}
+:::
+:::
+
+---
+
+## data
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(data.table)
+faculty <- read_csv("data/faculty.csv")
+courses <- read_csv("data/courses.csv")
+# brca <- readRDS("data/unstranded.rds")
+genes <- readRDS("data/rowdata.rds") |> janitor::remove_constant()
+clin <- readRDS("data/coldata.rds") |> janitor::remove_constant()
+assay <- readRDS("data/assay.rds")
+opts <- options(knitr.kable.NA = "")
+reactable <- function(...) {
+  reactable::reactable(..., wrap = F, resizable = T, bordered = T)
+}
+```
+
+::: {style="text-align: center"}
+`genes` has `{r} ncol(genes) ` columns and `{r} nrow(genes)` rows.
+:::
+
+<br>
+
+::: {style="font-size: 0.75em"}
+```{r}
+#| echo: false
+genes |> reactable(filterable = T)
+```
+:::
+
+---
+
+## data
+
+::: {style="text-align: center"}
+`clin` has `{r} ncol(clin) ` columns and `{r} nrow(clin)` rows.
+:::
+
+::: {style="font-size: 0.75em"}
+```{r}
+#| echo: false
+clin[, c("treatments", "disease_type"):=NULL] |>
+  reactable(filterable = T)
+```
+:::
+
+## data
+
+::: {style="text-align: center"}
+`assay` is a `{r} ncol(assay) `x`{r} nrow(assay)` matrix.
+:::
+
+<br>
+
+```{r}
+#| echo: false
+# print(assay[1:100,1:100])
+```
+
+# Basic data manipulation
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+[1]{style="opacity:0.25"} 2 [3 4 5 6]{style="opacity:0.25"}
+:::
+:::
+
+---
+
+## Useful operators
+
+<br>
+<br>
+
+::: columns
+::: {.column width="15%"}
+::: {style="font-size: 1.75em; text-align: center"}
+`<-` 
+:::
+:::
+
+::: {.column width="30%"}
+::: {style="font-size: 1.5em; text-align: center"}
+"save as" 
+:::
+:::
+
+::: {.column width="55%"}
+::: {style="font-size: 1.5em"}
+`Alt + -` 
+:::
+:::
+:::
+
+. . .
+
+::: columns
+::: {.column width="15%"}
+::: {style="font-size: 1.75em; text-align: center"}
+`|>` 
+:::
+:::
+
+::: {.column width="30%"}
+::: {style="font-size: 1.5em; text-align: center"}
+"and then" 
+:::
+:::
+
+::: {.column width="55%"}
+::: {style="font-size: 1.5em"}
+`Ctrl + shift + m`
+:::
+:::
+:::
+
+---
+
+## Common functions
+
+`filter` keeps or discards rows (aka observations)
+
+`select` keeps or discards columns (aka variables)
+
+`arrange` sorts data set by certain variable(s)
+
+`count` tallies data set by certain variable(s)
+
+`mutate` creates new variables
+
+`group_by`/`summarize` aggregates data ([pivot tables]{style="color:#cc0000"}!)
+
+`str_*` functions work easily with text
+
+---
+
+## Syntax of a function
+
+
+`function(data, argument(s))`
+
+
+. . .
+
+is the same as
+
+
+`
+data |>`
+  `function(arguments(3)) `
+---
+
+## Filter
+
+<br>
+
+`filter` keeps or discards rows (aka observations)
+
+the `==` operator tests for equality
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+genes |>
+  filter(gene_type == "miRNA")
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(genes |> filter(gene_type == "miRNA") |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Filter
+
+<br>
+
+the `|` operator signifies "or"
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+clin |> 
+ filter(paper_pathologic_stage == "Stage_II" |
+           paper_pathologic_stage == "Stage_III")
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+reactable( clin |> filter(paper_pathologic_stage == "Stage_II" | paper_pathologic_stage == "Stage_III"))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Filter
+
+<br>
+
+the `%in%` operator allows for multiple options in a list
+
+<br>
+
+::: columns
+::: {.column width="51%"}
+```{r}
+#| eval: false
+genes |> 
+  filter(gene_type %in% c("BRCA1",
+                      "TP53",
+                      "PTEN"))
+```
+:::
+
+::: {.column width="49%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+reactable(genes |> 
+  filter(gene_type %in% c("BRCA1",
+                      "TP53",
+                      "PTEN"))
+)
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Filter
+
+<br>
+
+the `&` operator combines conditions
+
+<br>
+
+::: columns
+::: {.column width="51%"}
+```{r}
+#| eval: false
+faculty |> 
+  filter(dept1 %in% c("Sociology",
+                      "Physics",
+                      "Music") &
+         rank == "Professor")
+```
+:::
+
+::: {.column width="49%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> filter(dept1 %in% c("Sociology","Physics","Music") & rank == "Professor") |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Select
+
+<br>
+
+`select` keeps or discards columns (aka variables)
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+faculty |> 
+  select(id, dept1, rank)
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> select(id, dept1, rank) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Select
+
+<br>
+
+can drop columns with -`column`
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+faculty |> 
+  select(-dept2)
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> select(-dept2) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Select
+
+<br>
+
+the pipe `|>` chains multiple functions together
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+faculty |> 
+ select(id, dept1, rank) |>
+  filter(rank == "Professor")
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> select(id, dept1, rank) |> filter(rank == "Professor") |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Arrange
+
+<br>
+
+`arrange` sorts data set by certain variable(s)
+
+use `desc()` to get descending order
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+courses |> 
+  arrange(desc(enrollment))
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> arrange(desc(enrollment)) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Arrange
+
+<br>
+
+can sort by multiple variables
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+courses |> 
+  arrange(dept, desc(enrollment))
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> arrange(dept, desc(enrollment)) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Count
+
+<br>
+
+`count` tallies data set by certain variable(s) (very useful for familiarizing yourself with data)
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+courses |> 
+  count(dept)
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> count(dept) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Count
+
+<br>
+
+can use `sort = TRUE` to order results
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+courses |> 
+  count(dept, level, sort = TRUE)
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> count(dept, level, sort = TRUE))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Mutate
+
+<br>
+
+`mutate` creates new variables (with a single `=`)
+
+<br>
+
+::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+faculty |> 
+  mutate(new = "hello!")
+```
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> mutate(new = "hello!") |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Mutate
+
+<br>
+
+much more useful with a conditional such as `ifelse()`, which has three arguments:
+
+condition, value if true, value if false
+
+<br>
+
+::: columns
+::: {.column width="70%"}
+```{r}
+#| eval: false
+faculty |> 
+  mutate(prof = ifelse(rank == "Professor",
+                      1, 0)) |>
+  select(rank, prof)
+```
+:::
+
+::: {.column width="30%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> mutate(prof = ifelse(rank == "Professor",
+                       1, 0)) |> select(rank, prof) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Mutate
+
+<br>
+
+the `!` operator means *not* 
+
+`is.na()` identifies null values
+
+<br>
+
+::: columns
+::: {.column width="60%"}
+```{r}
+#| eval: false
+faculty |> 
+  mutate(joint = ifelse(!is.na(dept2),
+                       "joint", NA)) |>
+  select(dept1, dept2, joint)
+
+```
+:::
+
+::: {.column width="40%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> mutate(joint = ifelse(!is.na(dept2),
+                        "joint", NA)) |> select(dept1, dept2, joint) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Mutate
+
+<br>
+
+with multiple conditions, `case_when()` is much easier!
+
+```{r}
+#| eval: false
+faculty |> 
+  mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
+                                "Social Sciences",
+                              dept1 %in% c("Music","English") ~
+                                "Humanities",
+                              dept1 %in% c("Chemistry","Physics") ~
+                               "Sciences")) |>
+  select(dept1, division)
+```
+
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
+                                "Social Sciences",
+                              dept1 %in% c("Music","English") ~
+                                "Humanities",
+                              dept1 %in% c("Chemistry","Physics") ~
+                               "Sciences")) |>
+  select(dept1, division) |> head(6))
+```
+:::
+:::
+
+---
+
+## Group by / summarize
+
+<br>
+
+`group_by`/`summarize` aggregates data ([pivot tables]{style="color:#cc0000"}!)
+
+`group_by()` identifies the grouping variable(s) and `summarize()` specifies the aggregation 
+
+<br>
+
+::: columns
+::: {.column width="60%"}
+```{r}
+#| eval: false
+courses |> 
+ group_by(dept, semester) |>
+  summarize(enr = sum(enrollment))
+```
+:::
+
+::: {.column width="40%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> 
+ group_by(dept, semester) |>
+  summarize(enr = sum(enrollment)) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Group by / summarize
+
+<br>
+
+useful arguments within `summarize`: 
+
+`mean`, `median`, `sd`, `min`, `max`, `n`
+
+<br>
+
+::: columns
+::: {.column width="67%"}
+```{r}
+#| eval: false
+courses |> 
+ group_by(dept, semester) |>
+  summarize(enr = sum(enrollment),
+            count = n_distinct(course_id))
+```
+:::
+
+::: {.column width="33%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> 
+ group_by(dept, semester) |>
+  summarize(enr = sum(enrollment),
+            courses = n_distinct(course_id)) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+# Using R effectively
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+[1 2]{style="opacity:0.25"} 3 [4 5 6]{style="opacity:0.25"}
+:::
+:::
+
+---
+
+## Working in RStudio
+
+::: {.absolute top="10%" left="0" width="1031" height="529"}
+::: {style="text-align: center"}
+![](RStudio2.png)
+:::
+:::
+
+::: {.absolute top="66%" left="55%"}
+::: {style="color: #cc0000"}
+project files are here
+:::
+:::
+
+::: {.absolute top="28%" left="70%"}
+::: {style="color: #cc0000"}
+imported data shows up here
+:::
+:::
+
+::: {.absolute top="35%" left="25%"}
+::: {style="color: #cc0000"}
+code can also<br>go here
+:::
+:::
+
+---
+
+## Working in RStudio
+
+::: columns
+::: {.column width="50%"}
+**Typing in the console**
+
+- think of it like a post-it: useful for quick notes but disposable
+
+- actions are saved but code is not
+
+- one chunk of code is run at a time (`Return`)
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+**Typing in a code file**
+
+- script files have a `.R` extension
+
+- code is saved and sections of any size can be run (`Cmd + Return`)
+
+- do ~95% of your typing in a code file instead of the console!
+:::
+:::
+:::
+
+---
+
+## Working with packages
+
+packages need to be installed on each computer you use
+
+```{r}
+#| eval: false
+# only need to do this once (per computer)
+install.packages("tidyverse")
+```
+
+<br>
+
+::: {.fragment}
+packages need to be loaded/attached with `library()` at the beginning of every session
+
+```{r}
+#| eval: false
+# always put the necessary packages at the top of a code file
+library(tidyverse)
+```
+:::
+
+<br>
+
+::: {.fragment}
+can access help files by typing `??tidyverse` or `??mutate` in the console
+:::
+
+---
+
+## Organizing with projects
+
+<br>
+
+[**highly**]{style="color: #cc0000"} recommend using *projects* to stay organized
+
+<br>
+
+keeps code files and data files together, allowing for easier file path navigation and better reproducible work habits
+
+. . .
+
+<br>
+
+`File -> New Project`
+
+<br>
+
+more guidance: [here](https://support.rstudio.com/hc/en-us/articles/200526207-Using-RStudio-Projects) and [here](https://r4ds.had.co.nz/workflow-projects.html#rstudio-projects)
+
+---
+
+## Organizing with projects
+
+::: {.absolute top="10%" left="0" width="1031" height="529"}
+::: {style="text-align: center"}
+![](RStudio2.png)
+:::
+:::
+
+::: {.absolute top="66%" left="55%"}
+::: {style="color: #cc0000"}
+project files are here
+:::
+:::
+
+::: {.absolute top="28%" left="70%"}
+::: {style="color: #cc0000"}
+imported data shows up here
+:::
+:::
+
+::: {.absolute top="35%" left="25%"}
+::: {style="color: #cc0000"}
+code can also<br>go here
+:::
+:::
+
+---
+
+## Accessing workshop materials
+
+::: {.absolute top="40%" left="0"}
+::: {style="text-align: center"}
+![](GitHub.png)
+:::
+:::
+
+<br>
+
+click big green Code button and select "Download ZIP", then open `neair.Rproj`
+
+---
+
+## Accessing data
+
+use `read_csv()` to import a csv file
+
+```{r}
+#| eval: false
+# the file path is this simple if you use projects!
+# ?read_csv() in the console will bring up the help file with more options
+faculty <- read_csv("faculty.csv")
+```
+
+<br>
+
+::: {.fragment}
+the [readxl](https://readxl.tidyverse.org/) package is helpful for Excel files
+
+```{r}
+#| eval: false
+# needs to be loaded but not installed as it's part of the tidyverse
+library(readxl)
+faculty <- read_excel("faculty.xlsx", sheet = 2)
+```
+:::
+
+<br>
+
+::: {.fragment}
+view the data with `View(faculty)` or by clicking on the data name in the Environment pane
+:::
+
+# More data manipulation
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+[1 2 3]{style="opacity:0.25"} 4 [5 6]{style="opacity:0.25"}
+:::
+:::
+
+---
+
+## Stringr functions
+
+<br>
+
+functions from `stringr` (which all start with `str_`) are useful for working with text data
+
+::: columns
+::: {.column width="58%"}
+```{r}
+#| eval: false
+faculty |> 
+  filter(str_detect(rank, "Professor"))
+```
+:::
+
+::: {.column width="42%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> 
+  filter(str_detect(rank, "Professor")) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Stringr functions
+
+<br>
+
+cheat sheet of functions is [here](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
+
+<br>
+
+::: columns
+::: {.column width="75%"}
+```{r}
+#| eval: false
+courses |> 
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                     str_sub(semester, 5, 6))) |>
+ select(semester, year) |>
+  unique()
+```
+:::
+
+::: {.column width="25%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> 
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                      str_sub(semester, 5, 6))) |> select(semester, year) |> unique())
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Pivoting data
+
+existing `faculty` data has one row per faculty, some with multiple departments (sometimes known as *wide* data)
+
+<br>
+
+::: {style="font-size: 0.75em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> head(6))
+```
+:::
+
+---
+
+## Pivoting data
+
+what if you instead want one row per faculty *per department*? (sometimes known as *long* data)
+
+<br>
+
+::: {style="font-size: 0.75em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> 
+  pivot_longer(dept1:dept2,
+               names_to = "dept_no",
+               values_to = "dept",
+               values_drop_na = TRUE) |> head(6))
+```
+:::
+
+---
+
+## Pivoting data
+
+<br>
+
+the `pivot_longer` function lengthens data
+
+<br>
+
+::: columns
+::: {.column width="66%"}
+```{r}
+#| eval: false
+faculty |> 
+  pivot_longer(dept1:dept2,
+               names_to = "dept_no",
+               values_to = "dept",
+              values_drop_na = TRUE) |>
+  select(-year, -rank)
+```
+:::
+
+::: {.column width="34%"}
+::: {.fragment}
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> 
+  pivot_longer(dept1:dept2,
+               names_to = "dept_no",
+               values_to = "dept",
+              values_drop_na = TRUE) |>
+  select(-year, -rank) |> head(6))
+```
+:::
+:::
+:::
+:::
+
+---
+
+## Pivoting data
+
+<br>
+
+and `pivot_wider` does the opposite!
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> head(2))
+```
+:::
+
+. . .
+
+<br>
+
+```{r}
+#| eval: false
+courses |> 
+  pivot_wider(names_from = "level",
+              values_from = "enrollment")
+```
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> 
+  pivot_wider(names_from = "level",
+              values_from = "enrollment") |> head(4))
+```
+:::
+
+---
+
+## Joining data
+
+<br>
+
+R has many useful functions for handling [relational data]{style="color: #cc0000"}
+
+<br>
+
+all you need is at least one [key variable]{style="color: #cc0000"} that connects data sets
+
+<br>
+
+`left_join` is most common, but there are [more](https://r4ds.had.co.nz/relational-data.html)
+
+---
+
+## Joining data
+
+what's the average UG enrollment per year, per faculty rank?
+
+. . .
+
+::: {style="text-align: center"}
+`faculty`
+:::
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> head(4))
+```
+:::
+
+::: {style="text-align: center"}
+`courses`
+:::
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> head(4))
+```
+:::
+
+. . .
+
+::: {style="text-align: center"}
+`faculty$id` is the same as `courses$faculty_id`
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average [UG enrollment per year, per faculty]{style="color: #cc0000"} rank?
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses |> head(5))
+```
+:::
+
+. . .
+
+- filter to `UG` courses only
+- create our `year` variable again 
+- summarize `enrollment` by `year` and `faculty_id`
+
+---
+
+## Joining data
+
+<br>
+
+use the `<-` operator to create a new data frame `courses_UG`
+
+```{r}
+#| eval: false
+#| code-line-numbers: "1"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                      str_sub(semester, 5, 6)))
+```
+
+---
+
+## Joining data
+
+<br>
+
+`filter` to undergraduate courses only and `mutate` a new academic year variable
+
+```{r}
+#| eval: false
+#| code-line-numbers: "2-5"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                      str_sub(semester, 5, 6)))
+```
+
+---
+
+## Joining data
+
+<br>
+
+`group_by` year and faculty member; `summarize` enrollment
+
+```{r}
+#| code-line-numbers: "6-7"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                     str_sub(semester, 5, 6))) |>
+ group_by(year, faculty_id) |>
+  summarize(enr = sum(enrollment))
+```
+
+. . .
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses_UG |> head(4))
+```
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average UG enrollment per year, per faculty rank?
+
+::: columns
+::: {.column width="60%"}
+::: {style="text-align: center"}
+`faculty`
+:::
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(faculty |> head(6))
+```
+:::
+:::
+
+::: {.column width="40%"}
+::: {style="text-align: center"}
+`courses_UG`
+:::
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(courses_UG |> arrange(desc(year)) |> head(6))
+```
+:::
+:::
+:::
+
+---
+
+## Joining data
+
+<br>
+
+```{r}
+fac_enr <- faculty |>
+  left_join(courses_UG, by = c("id" = "faculty_id",
+                               "year" = "year"))
+```
+
+1. `fac_enr`: new data frame
+2. `faculty`: data frame you're adding data to
+3. `courses_UG`: data frame where the new data is coming from
+
+. . .
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(fac_enr |> head(6))
+```
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average UG enrollment per year, per faculty rank?
+
+```{r}
+#| code-line-numbers: "4-5"
+fac_enr <- faculty |> 
+  left_join(courses_UG, by = c("id" = "faculty_id",
+                              "year" = "year")) |>
+ group_by(year, rank) |>
+  summarize(avg_enr = mean(enr, na.rm = TRUE))
+```
+
+. . .
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| echo: false
+knitr::kable(fac_enr |> arrange(desc(year)) |> head(6))
+```
+:::
+
+# Data visualization
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+[1 2 3 4]{style="opacity:0.25"} 5 [6]{style="opacity:0.25"}
+:::
+:::
+
+## ggplot2
+
+<br>
+
+`ggplot2` is the data visualization package that is loaded with the `tidyverse`
+
+<br>
+
+the [g]{style="color:#cc0000"}rammar of [g]{style="color:#cc0000"}raphics maps data to the aesthetic attributes of geometric points
+
+. . .
+
+<br>
+
+encoding data into visual cues (e.g., length, color, position, size) is how we signify changes and comparisons
+
+---
+
+## Bar chart
+
+```{r}
+#| code-line-numbers: "1-2|3|4"
+#| eval: false
+faculty |>
+  count(rank) |>
+  ggplot(aes(x = rank, y = n)) +
+  geom_bar(stat = "identity")
+```
+
+. . .
+
+to combine lines into one code chunk, use `+` instead of `|>`
+
+. . .
+
+```{r}
+#| echo: false
+#| fig-height: 4
+#| fig-align: "center"
+faculty |>
+  count(rank) |>
+  ggplot(aes(x = rank, y = n)) +
+  geom_bar(stat = "identity")
+```
+
+---
+
+## Bar chart
+
+can create a prettier plot pretty easily
+
+```{r}
+#| code-fold: true
+#| code-summary: "expand for full code"
+#| fig-align: "center"
+faculty |>
+  count(rank) |>
+  ggplot(aes(x = reorder(rank, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "#cc0000") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  geom_text(aes(label = n), vjust = -0.5) +
+  labs(x = NULL, y = NULL,
+       title = "Count of faculty by rank, 2018-2021") +
+  theme_linedraw() +
+  theme(panel.grid.major.x = element_blank(),
+        axis.ticks = element_blank())
+```
+
+---
+
+## Line graph
+
+<br>
+
+```{r}
+#| code-line-numbers: "1-2|3|4"
+#| eval: false
+fac_enr |> 
+ filter(!is.na(avg_enr)) |>
+  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
+  geom_line()
+```
+
+. . .
+
+```{r}
+#| echo: false
+#| fig-height: 4
+#| fig-align: "center"
+fac_enr |> 
+ filter(!is.na(avg_enr)) |>
+  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
+  geom_line()
+```
+
+---
+
+## Line graph
+
+```{r}
+#| code-fold: true
+#| code-summary: "expand for full code"
+#| fig-align: "center"
+fac_enr |> 
+ filter(!is.na(avg_enr)) |>
+  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
+  geom_line() +
+  geom_point() +
+  scale_color_brewer(type = "qual", palette = "Dark2") +
+  labs(x = NULL, y = "Average enrollment",
+       title = "Average undergraduate enrollment per rank over time") +
+  theme_linedraw() +
+  theme(panel.grid.major.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = NA),
+        legend.key = element_rect(fill = NA),
+        legend.position = c(0.85, 0.82))
+```
+
+---
+
+## ggplot2 resources
+
+from [R for Data Science](https://r4ds.had.co.nz/data-visualisation.html)
+
+<br>
+
+[Data Visualization: a practical introduction](https://socviz.co/index.html#preface)
+
+<br>
+
+creating [custom themes](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)
+
+<br>
+
+the [ggplot2 book](https://ggplot2-book.org/)
+
+<br>
+
+the [R graph gallery](https://r-graph-gallery.com/index.html)
+
+---
+
+## Putting it all together
+
+<br>
+
+with what we've done so far, your `.R` file could:
+
+::: {.incremental}
+- import your data files
+- [document all data cleaning and preparation steps and decisions]{style="color:#cc0000"}
+- produce a PPT-ready graphic summarizing your results
+:::
+
+. . .
+
+::: {style="text-align: center"}
+**and that file would make it extremely easy for you or someone else to reproduce this analysis with new data in six months**
+:::
+
+# Advanced topics
+
+::: {.absolute top="0" left="100%"}
+::: {.sectionhead}
+[1 2 3 4 5]{style="opacity:0.25"} 6
+:::
+:::
+
+## R Markdown
+
+<br>
+
+using RStudio, create `.Rmd` documents that combine text, code, and graphics
+
+. . .
+
+<br>
+
+many output formats: html, pdf, Word, slides
+
+. . .
+
+<br>
+
+exceedingly useful for [parameterized reporting]{style="color:#cc0000"}: can create an R-based PDF report and generate it automatically for, say, each department
+
+---
+
+## Internal packages
+
+<br>
+
+you can also create your *own* packages!
+
+. . .
+
+<br>
+
+your package can hold:
+
+- common data sets that are used across projects
+- custom `ggplot2` themes
+- common functions and calculations (and their definitions!)
+
+. . .
+
+<br>
+
+can be stored on a shared drive to facilitate collaboration
+
+---
+
+## R Markdown and package resources
+
+<br>
+
+**R Markdown**
+
+the official [R Markdown website](https://rmarkdown.rstudio.com/lesson-1.html)
+
+[R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
+
+<br>
+
+**internal packages**
+
+a comprehensive [theoretical explainer](https://emilyriederer.netlify.app/post/team-of-packages/)
+
+a [talk I gave](https://meghan.rbind.io/talk/boston-user/) earlier this year on the topic
+
+# Learn more about R
+
+## Resources
+
+[R for Data Science](https://r4ds.had.co.nz/): the ultimate guide
+
+<br>
+
+[R for Excel users](https://rstudio-conf-2020.github.io/r-for-excel/): a very useful workshop
+
+<br>
+
+[STAT 545](https://stat545.com/): an online book on reproducible data analysis in R
+
+<br>
+
+the [RStudio Education](https://education.rstudio.com/) site
+
+<br>
+
+the [Learn `tidyverse`](https://www.tidyverse.org/learn/) site

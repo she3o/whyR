@@ -1,0 +1,32 @@
+project:
+  title: "Why R?"
+  output-dir: dist
+
+title: Why R?
+authors:
+  - name: Anas Shashaey
+    affiliation: Biochemistry Dept., Faculty of Pharmacy - Ain Shams University
+from: markdown+emoji
+execute:
+  echo: true
+  freeze: true
+bibliography: references.bib
+date: today
+format:
+  revealjs:
+    progress: true
+    lightbox: true
+    controls: true
+    navigation-mode: vertical
+    controls-back-arrows: hidden
+    slide-number: true
+    menu: false
+    incremental: false
+    preview-links: true
+    footer: Why R?
+    smaller: true
+    theme: [moon, custom.scss]
+    center: true
+    chalkboard: 
+      boardmarker-width: 5
+
