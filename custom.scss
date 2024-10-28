@@ -77,3 +77,12 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 .reveal .slides .logos img {
 	max-height: 5em;
 }
+
+.Reactable .rt-table {
+	@extend .fragment;
+	font-size: 0.45em;
+}
+
+.rt-pagination {
+	font-size: small;
+}

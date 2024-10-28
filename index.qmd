@@ -2,10 +2,8 @@
 #| label: a1
 #| echo: false
 
-opts <- options(knitr.kable.NA = "")
 reactable <- function(...) {
   reactable::reactable(..., wrap = F, resizable = T, bordered = T)
-
 }
 
 knit_print.data.frame = function(x, ...) {
@@ -25,12 +23,10 @@ registerS3method(
 #| label: a2
 #| echo: false
 library(tidyverse)
-library(data.table)
 faculty <- read_csv("data/faculty.csv")
 courses <- read_csv("data/courses.csv")
-# brca <- readRDS("data/unstranded.rds")
-genes <- readRDS("data/rowdata.rds") |> janitor::remove_constant()
-clin <- readRDS("data/coldata.rds") |> janitor::remove_constant()
+genes <- readRDS("data/rowdata.rds")
+clin <- readRDS("data/coldata.rds")
 assay <- readRDS("data/assay.rds")
 ```
 
@@ -232,7 +228,7 @@ You use R via *packages*
 ```{r}
 #| label: a3
 #| echo: false
-genes #|> reactable(filterable = T)
+genes
 ```
 :::
 
@@ -248,7 +244,7 @@ genes #|> reactable(filterable = T)
 ```{r}
 #| label: a4
 #| echo: false
-clin[, c("treatments", "disease_type"):=NULL]
+clin
 ```
 :::
 
@@ -263,7 +259,10 @@ clin[, c("treatments", "disease_type"):=NULL]
 ```{r}
 #| label: a5
 #| echo: false
-# print(assay[1:100,1:100])
+display_assay <- assay[1:100,1:100]
+colnames(display_assay) <- NULL
+rownames(display_assay) <- NULL
+display_assay
 ```
 
 # Basic data manipulation
@@ -352,559 +351,329 @@ data |>`
 
 the `==` operator tests for equality
 
+. . .
 
 ```{r}
 #| label: a6
-#| eval: false
 genes |>
   filter(gene_type == "miRNA")
 ```
 
-. . .
-
-```{r}
-#| label: b1
-#| eval: true
-#| echo: false
-reactable(genes |>
-  filter(gene_type == "miRNA"))
-```
-
 ---
 
 ## Filter
-
-<br>
 
 the `|` operator signifies "or"
 
-<br>
+. . .
 
-::: columns
-::: {.column width="50%"}
 ```{r}
 #| label: a7
 clin |> 
- filter(paper_pathologic_stage == "Stage_II" |
-           paper_pathologic_stage == "Stage_III")
+  filter(
+    paper_pathologic_stage == "Stage_II" |
+    paper_pathologic_stage == "Stage_III"
+  )
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a8
-#| echo: false
-# reactable(.Last.value)
-```
-:::
-:::
-:::
-
 
 ---
 
 ## Filter
-
-<br>
 
 the `%in%` operator allows for multiple options in a list
 
-<br>
+. . .
 
-::: columns
-::: {.column width="51%"}
 ```{r}
-#| label: a9
-#| eval: false
+#| label: a8
 genes |> 
-  filter(gene_type %in% c("BRCA1",
-                      "TP53",
-                      "PTEN"))
+  filter(
+    gene_name %in% c("BRCA1", "TP53", "PTEN")
+  )
 ```
-:::
-
-::: {.column width="49%"}
-::: {.data-table}
-```{r}
-#| label: a10
-#| echo: false
-reactable(genes |> 
-  filter(gene_type %in% c("BRCA1",
-                      "TP53",
-                      "PTEN"))
-)
-```
-:::
-:::
-:::
 
 ---
 
 ## Filter
 
-<br>
-
 the `&` operator combines conditions
 
-<br>
-
-::: columns
-::: {.column width="51%"}
 ```{r}
-#| label: a11
-#| eval: false
-faculty |> 
-  filter(dept1 %in% c("Sociology",
-                      "Physics",
-                      "Music") &
-         rank == "Professor")
+#| label: a9
+clin |> 
+  filter(
+    paper_pathologic_stage %in% c("Stage_I", "Stage_II") &
+    year_of_birth > 1970
+  )
 ```
-:::
-
-::: {.column width="49%"}
-::: {.data-table}
-```{r}
-#| label: a12
-#| echo: false
-reactable(faculty |> filter(dept1 %in% c("Sociology","Physics","Music") & rank == "Professor"))
-```
-:::
-:::
-:::
 
 ---
 
 ## Select
-
-<br>
 
 `select` keeps or discards columns (aka variables)
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a13
-#| eval: false
-faculty |> 
-  select(id, dept1, rank)
+#| label: a10
+clin |> 
+  select(
+    patient,
+    ajcc_pathologic_n,
+    ajcc_pathologic_m,
+    ajcc_pathologic_t
+  )
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a14
-#| echo: false
-reactable(faculty |> select(id, dept1, rank))
-```
-:::
-:::
-:::
 
 ---
 
 ## Select
 
-<br>
+can drop columns with `- column`
 
-can drop columns with -`column`
-
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a15
-#| eval: false
-faculty |> 
-  select(-dept2)
+#| label: a11
+clin |> 
+  select(
+    -barcode,
+    -sample,
+    -sample_submitter_id
+  )
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a16
-#| echo: false
-reactable(faculty |> select(-dept2))
-```
-:::
-:::
-:::
 
 ---
 
 ## Select
-
-<br>
 
 the pipe `|>` chains multiple functions together
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a17
-#| eval: false
-faculty |> 
- select(id, dept1, rank) |>
-  filter(rank == "Professor")
+#| label: a12
+genes |> 
+  filter(
+    gene_type == "lncRNA"
+  ) |>
+  pull(gene_name)
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a18
-#| echo: false
-reactable(faculty |> select(id, dept1, rank) |> filter(rank == "Professor"))
-```
-:::
-:::
-:::
 
 ---
 
 ## Arrange
-
-<br>
 
 `arrange` sorts data set by certain variable(s)
 
 use `desc()` to get descending order
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a19
-#| eval: false
+#| label: a13
 clin |> 
   arrange(desc(age_at_diagnosis))
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a20
-#| echo: false
-reactable(clin |> arrange(desc(age_at_diagnosis)))
-```
-:::
-:::
-:::
-
----
-
-## Arrange
-
-<br>
-
-can sort by multiple variables
-
-<br>
-
-::: columns
-::: {.column width="50%"}
-```{r}
-#| label: a21
-#| eval: false
-courses |> 
-  arrange(dept, desc(enrollment))
-```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a22
-#| echo: false
-reactable(courses |> arrange(dept, desc(enrollment)))
-```
-:::
-:::
-:::
 
 ---
 
 ## Count
-
-<br>
 
 `count` tallies data set by certain variable(s) (very useful for familiarizing yourself with data)
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a23
-#| eval: false
-courses |> 
-  count(dept)
+#| label: a14
+clin |> 
+  count(gender)
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a24
-#| echo: false
-reactable(courses |> count(dept))
-```
-:::
-:::
-:::
 
 ---
 
 ## Count
 
-<br>
-
 can use `sort = TRUE` to order results
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a25
-#| eval: false
-courses |> 
-  count(dept, level, sort = TRUE)
+#| label: a15
+clin |> 
+  count(paper_pathologic_stage, sort = TRUE)
 ```
-:::
 
-::: {.column width="50%"}
-::: {.data-table}
+---
+
+## Count
+
+You can tally across all combinations of multiple variables
+
 ```{r}
-#| label: a26
-#| echo: false
-reactable(courses |> count(dept, level, sort = TRUE))
+#| label: a16
+clin |> 
+  count(
+    paper_pathologic_stage,
+    paper_BRCA_Pathology,
+    sort = TRUE
+  )
 ```
-:::
-:::
-:::
 
 ---
 
 ## Mutate
-
-<br>
 
 `mutate` creates new variables (with a single `=`)
 
-<br>
-
-::: columns
-::: {.column width="50%"}
 ```{r}
-#| label: a27
-#| eval: false
-faculty |> 
-  mutate(new = "hello!")
+#| label: a17
+clin |> 
+  mutate(source = "TCGA")
 ```
-:::
-
-::: {.column width="50%"}
-::: {.data-table}
-```{r}
-#| label: a28
-#| echo: false
-reactable(faculty |> mutate(new = "hello!"))
-```
-:::
-:::
-:::
 
 ---
 
 ## Mutate
-
-<br>
 
 much more useful with a conditional such as `ifelse()`, which has three arguments:
 
 condition, value if true, value if false
 
-<br>
-
-::: columns
-::: {.column width="70%"}
 ```{r}
-#| label: a29
-#| eval: false
-faculty |> 
-  mutate(prof = ifelse(rank == "Professor",
-                      1, 0)) |>
-  select(rank, prof)
+#| label: a18
+clin |> count(ajcc_pathologic_m)
 ```
-:::
+---
 
-::: {.column width="30%"}
-::: {.data-table}
 ```{r}
-#| label: a30
-#| echo: false
-reactable(faculty |> mutate(prof = ifelse(rank == "Professor",
-                       1, 0)) |> select(rank, prof))
+#| label: a18
+clin |> 
+  mutate(
+    metastatic = ifelse(
+      ajcc_pathologic_m %in% c("M0", "cM0 (i+)") ,
+      0, 1
+    )
+  ) |>
+  select(metastatic, ajcc_pathologic_m)
 ```
-:::
-:::
-:::
 
 ---
 
 ## Mutate
-
-<br>
 
 the `!` operator means *not* 
 
 `is.na()` identifies null values
 
-<br>
+`case_when` generalize `ifelse` to more than two categories
 
-::: columns
-::: {.column width="60%"}
 ```{r}
-#| label: a31
-#| eval: false
-faculty |> 
-  mutate(joint = ifelse(!is.na(dept2),
-                       "joint", NA)) |>
-  select(dept1, dept2, joint)
-
+#| label: a19
+clin |> 
+  mutate(
+    metastatic = ifelse(
+      !is.na(ajcc_pathologic_m) &
+      ajcc_pathologic_m %in% c("M0", "cM0 (i+)") ,
+      0,1
+    )
+  ) |>
+  select(metastatic, ajcc_pathologic_m)
 ```
-:::
-
-::: {.column width="40%"}
-::: {.data-table}
-```{r}
-#| label: a32
-#| echo: false
-reactable(faculty |> mutate(joint = ifelse(!is.na(dept2),
-                        "joint", NA)) |> select(dept1, dept2, joint))
-```
-:::
-:::
-:::
 
 ---
 
 ## Mutate
 
-<br>
-
 with multiple conditions, `case_when()` is much easier!
 
 ```{r}
-#| label: a33
-#| eval: false
-faculty |> 
-  mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
-                                "Social Sciences",
-                              dept1 %in% c("Music","English") ~
-                                "Humanities",
-                              dept1 %in% c("Chemistry","Physics") ~
-                               "Sciences")) |>
-  select(dept1, division)
+#| label: a20
+clin |> 
+  mutate(
+    t = case_when(
+      ajcc_pathologic_t %in% c("T1", "T1a", "T1b", "T1c") ~ "T1",
+      ajcc_pathologic_t %in% c("T2", "T2a", "T2b") ~ "T2",
+      ajcc_pathologic_t %in% c("T3", "T3a") ~ "T3",
+      ajcc_pathologic_t %in% c("T4", "T4b", "T4d") ~ "T4",
+      ajcc_pathologic_t == "TX" ~ NA,
+      TRUE ~ ajcc_pathologic_t
+    )
+  ) |>
+  select(t, ajcc_pathologic_t)
 ```
 
-::: {.data-table}
+---
+
+## Mutate
+
+Here is real-life code
+
 ```{r}
-#| label: a34
-#| echo: false
-reactable(faculty |> mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
-                                "Social Sciences",
-                              dept1 %in% c("Music","English") ~
-                                "Humanities",
-                              dept1 %in% c("Chemistry","Physics") ~
-                               "Sciences")) |>
-  select(dept1, division))
+#| label: a21
+clin |> 
+  mutate(
+    t = case_when(
+      str_starts(ajcc_pathologic_t, "T1") ~ "T1",
+      str_starts(ajcc_pathologic_t, "T2") ~ "T2",
+      str_starts(ajcc_pathologic_t, "T3") ~ "T3",
+      str_starts(ajcc_pathologic_t, "T4") ~ "T4",
+      ajcc_pathologic_t == "TX" ~ NA,
+      TRUE ~ ajcc_pathologic_t
+    )
+  ) |>
+  select(t, ajcc_pathologic_t)
 ```
-:::
+---
+
+## Mutate
+
+Here is real-life code
+
+```{r}
+#| label: a22
+genes <- genes %>%
+  mutate(
+    full_gene_name = AnnotationDbi::mapIds(
+      org.Hs.eg.db::org.Hs.eg.db,
+      keys = gene_name,
+      column = "GENENAME",
+      keytype = "SYMBOL",
+      multiVals = "first"
+    )
+  )
+
+  genes |> select(
+    gene_name,
+    full_gene_name
+  )
+```
 
 ---
 
 ## Group by / summarize
 
-<br>
-
-`group_by`/`summarize` aggregates data ([pivot tables]{style="color:#cc0000"}!)
+`group_by`/`summarize` aggregates data (**pivot tables**!)
 
 `group_by()` identifies the grouping variable(s) and `summarize()` specifies the aggregation 
 
-<br>
+. . .
 
-::: columns
-::: {.column width="60%"}
 ```{r}
-#| label: a35
-#| eval: false
+#| label: a23
 courses |> 
  group_by(dept, semester) |>
-  summarize(enr = sum(enrollment))
+  summarize(
+    enr = sum(enrollment)
+  )
 ```
-:::
-
-::: {.column width="40%"}
-::: {.data-table}
-```{r}
-#| label: a36
-#| echo: false
-reactable(courses |> 
- group_by(dept, semester) |>
-  summarize(enr = sum(enrollment)))
-```
-:::
-:::
-:::
 
 ---
 
 ## Group by / summarize
-
-<br>
 
 useful arguments within `summarize`: 
 
 `mean`, `median`, `sd`, `min`, `max`, `n`
 
-<br>
-
-::: columns
-::: {.column width="67%"}
 ```{r}
-#| label: a37
-#| eval: false
+#| label: a24
 courses |> 
- group_by(dept, semester) |>
-  summarize(enr = sum(enrollment),
-            count = n_distinct(course_id))
+  group_by(dept, semester) |>
+  summarize(
+    enr = sum(enrollment),
+    count = n_distinct(course_id)
+  )
 ```
-:::
-
-::: {.column width="33%"}
-::: {.data-table}
-```{r}
-#| label: a38
-#| echo: false
-reactable(courses |> 
- group_by(dept, semester) |>
-  summarize(enr = sum(enrollment),
-            courses = n_distinct(course_id)))
-```
-:::
-:::
-:::
 
 # Using R effectively
 
@@ -947,7 +716,7 @@ reactable(courses |>
 packages need to be installed on each computer you use
 
 ```{r}
-#| label: a39
+#| label: a25
 #| eval: false
 install.packages("tidyverse") # <1>
 ```
@@ -973,7 +742,7 @@ Packages that specialize in the analysis biological data are often hosted on **B
 They can be installed as follows:
 
 ```{r} 
-#| label: a40
+#| label: a26
 #| eval: false
 if (!require("BiocManager", quietly = TRUE)) # <1>
     install.packages("BiocManager") # <1>
@@ -1006,7 +775,7 @@ Journals and regulatory bodies don't allow the use of arbitrary packages in subm
 packages need to be loaded/attached with `library()` at the beginning of every session
 
 ```{r}
-#| label: a41
+#| label: a27
 #| eval: false
 # always put the necessary packages at the top of a code file
 library(tidyverse)
@@ -1047,32 +816,33 @@ more guidance: [here](https://support.posit.co/hc/en-us/articles/200526207-Using
 use `read_csv()` to import a csv file
 
 ```{r}
-#| label: a42
+#| label: a28
 #| eval: false
 # the file path is this simple if you use projects!
 # ?read_csv() in the console will bring up the help file with more options
 faculty <- read_csv("faculty.csv")
 ```
 
-<br>
+---
 
-::: {.fragment}
+## Accessing data
+
 the [readxl](https://readxl.tidyverse.org/) package is helpful for Excel files
 
+. . .
+
+
 ```{r}
-#| label: a43
+#| label: a29
 #| eval: false
 # needs to be loaded but not installed as it's part of the tidyverse
 library(readxl)
 faculty <- read_excel("faculty.xlsx", sheet = 2)
 ```
-:::
 
-<br>
+. . .
 
-::: {.fragment}
 view the data with `View(faculty)` or by clicking on the data name in the Environment pane
-:::
 
 ---
 
@@ -1081,7 +851,7 @@ view the data with `View(faculty)` or by clicking on the data name in the Enviro
 Most biological databases offer R packages that automate data retrieval.
 
 ```{r} 
-#| label: a44
+#| label: a30
 #| eval: false
 library(TCGAbiolinks) # <1>
 
@@ -1110,47 +880,22 @@ assay <- GDCprepare(query) # <4>
 
 ## Stringr functions
 
-<br>
-
 functions from `stringr` (which all start with `str_`) are useful for working with text data
 
-::: columns
-::: {.column width="58%"}
 ```{r}
-#| label: a45
-#| eval: false
+#| label: a31
 faculty |> 
   filter(str_detect(rank, "Professor"))
 ```
-:::
-
-::: {.column width="42%"}
-::: {.data-table}
-```{r}
-#| label: a46
-#| echo: false
-reactable(faculty |> 
-  filter(str_detect(rank, "Professor")))
-```
-:::
-:::
-:::
 
 ---
 
 ## Stringr functions
 
-<br>
-
 cheat sheet of functions is [here](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
 
-<br>
-
-::: columns
-::: {.column width="75%"}
 ```{r}
-#| label: a47
-#| eval: false
+#| label: a32
 courses |> 
  mutate(year = str_c(str_sub(semester, 1, 4),
                       "-",
@@ -1158,21 +903,6 @@ courses |>
  select(semester, year) |>
   unique()
 ```
-:::
-
-::: {.column width="25%"}
-::: {.data-table}
-```{r}
-#| label: a48
-#| echo: false
-reactable(courses |> 
- mutate(year = str_c(str_sub(semester, 1, 4),
-                      "-",
-                      str_sub(semester, 5, 6))) |> select(semester, year) |> unique())
-```
-:::
-:::
-:::
 
 ---
 
@@ -1180,15 +910,11 @@ reactable(courses |>
 
 existing `faculty` data has one row per faculty, some with multiple departments (sometimes known as *wide* data)
 
-<br>
-
-::: {style="font-size: 0.75em"}
 ```{r}
-#| label: a49
+#| label: a33
 #| echo: false
-reactable(faculty)
+faculty
 ```
-:::
 
 ---
 
@@ -1196,17 +922,15 @@ reactable(faculty)
 
 what if you instead want one row per faculty *per department*? (sometimes known as *long* data)
 
-<br>
-
 ::: {style="font-size: 0.75em"}
 ```{r}
-#| label: a50
+#| label: a34
 #| echo: false
-reactable(faculty |> 
+faculty |> 
   pivot_longer(dept1:dept2,
                names_to = "dept_no",
                values_to = "dept",
-               values_drop_na = TRUE))
+               values_drop_na = TRUE)
 ```
 :::
 
@@ -1214,17 +938,10 @@ reactable(faculty |>
 
 ## Pivoting data
 
-<br>
-
 the `pivot_longer` function lengthens data
 
-<br>
-
-::: columns
-::: {.column width="66%"}
 ```{r}
-#| label: a51
-#| eval: false
+#| label: a35
 faculty |> 
   pivot_longer(dept1:dept2,
                names_to = "dept_no",
@@ -1232,75 +949,35 @@ faculty |>
               values_drop_na = TRUE) |>
   select(-year, -rank)
 ```
-:::
-
-::: {.column width="34%"}
-::: {.data-table}
-```{r}
-#| label: a52
-#| echo: false
-reactable(faculty |> 
-  pivot_longer(dept1:dept2,
-               names_to = "dept_no",
-               values_to = "dept",
-              values_drop_na = TRUE) |>
-  select(-year, -rank))
-```
-:::
-:::
-:::
 
 ---
 
 ## Pivoting data
 
-<br>
-
 and `pivot_wider` does the opposite!
 
-::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a53
+#| label: a36
 #| echo: false
-reactable(courses |> head(2))
+courses |> head(2)
 ```
-:::
 
 . . .
 
-<br>
-
 ```{r}
-#| label: a54
-#| eval: false
+#| label: a37
 courses |> 
   pivot_wider(names_from = "level",
               values_from = "enrollment")
 ```
 
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a55
-#| echo: false
-reactable(courses |> 
-  pivot_wider(names_from = "level",
-              values_from = "enrollment") |> head(4))
-```
-:::
-
 ---
 
 ## Joining data
 
-<br>
-
 R has many useful functions for handling [relational data]{style="color: #cc0000"}
 
-<br>
-
 all you need is at least one [key variable]{style="color: #cc0000"} that connects data sets
-
-<br>
 
 `left_join` is most common, but there are [more](https://r4ds.had.co.nz/relational-data.html)
 
@@ -1318,7 +995,7 @@ what's the average UG enrollment per year, per faculty rank?
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a56
+#| label: a38
 #| echo: false
 reactable(faculty |> head(4))
 ```
@@ -1330,7 +1007,7 @@ reactable(faculty |> head(4))
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a57
+#| label: a39
 #| echo: false
 reactable(courses |> head(4))
 ```
@@ -1354,7 +1031,7 @@ what's the average [UG enrollment per year, per faculty]{style="color: #cc0000"}
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a58
+#| label: a40
 #| echo: false
 reactable(courses |> head(5))
 ```
@@ -1375,7 +1052,7 @@ reactable(courses |> head(5))
 use the `<-` operator to create a new data frame `courses_UG`
 
 ```{r}
-#| label: a59
+#| label: a41
 #| eval: false
 #| code-line-numbers: "1"
 courses_UG <- courses |> 
@@ -1394,7 +1071,7 @@ courses_UG <- courses |>
 `filter` to undergraduate courses only and `mutate` a new academic year variable
 
 ```{r}
-#| label: a60
+#| label: a42
 #| eval: false
 #| code-line-numbers: "2-5"
 courses_UG <- courses |> 
@@ -1413,7 +1090,7 @@ courses_UG <- courses |>
 `group_by` year and faculty member; `summarize` enrollment
 
 ```{r}
-#| label: a61
+#| label: a43
 #| code-line-numbers: "6-7"
 courses_UG <- courses |> 
  filter(level == "UG") |>
@@ -1430,7 +1107,7 @@ courses_UG <- courses |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a62
+#| label: a44
 #| echo: false
 reactable(courses_UG |> head(4))
 ```
@@ -1451,7 +1128,7 @@ what's the average UG enrollment per year, per faculty rank?
 :::
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a63
+#| label: a45
 #| echo: false
 reactable(faculty)
 ```
@@ -1464,7 +1141,7 @@ reactable(faculty)
 :::
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a64
+#| label: a46
 #| echo: false
 reactable(courses_UG |> arrange(desc(year)))
 ```
@@ -1479,7 +1156,7 @@ reactable(courses_UG |> arrange(desc(year)))
 <br>
 
 ```{r}
-#| label: a65
+#| label: a47
 fac_enr <- faculty |>
   left_join(courses_UG, by = c("id" = "faculty_id",
                                "year" = "year"))
@@ -1493,7 +1170,7 @@ fac_enr <- faculty |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a66
+#| label: a48
 #| echo: false
 reactable(fac_enr)
 ```
@@ -1508,7 +1185,7 @@ reactable(fac_enr)
 what's the average UG enrollment per year, per faculty rank?
 
 ```{r}
-#| label: a67
+#| label: a49
 #| code-line-numbers: "4-5"
 fac_enr <- faculty |> 
   left_join(courses_UG, by = c("id" = "faculty_id",
@@ -1523,7 +1200,7 @@ fac_enr <- faculty |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
-#| label: a68
+#| label: a50
 #| echo: false
 reactable(fac_enr |> arrange(desc(year)))
 ```
@@ -1556,7 +1233,7 @@ encoding data into visual cues (e.g., length, color, position, size) is how we s
 ## Bar chart
 
 ```{r}
-#| label: a69
+#| label: a51
 #| code-line-numbers: "1-2|3|4"
 #| eval: false
 faculty |>
@@ -1572,7 +1249,7 @@ to combine lines into one code chunk, use `+` instead of `|>`
 . . .
 
 ```{r}
-#| label: a70
+#| label: a52
 #| echo: false
 #| fig-height: 4
 #| fig-align: "center"
@@ -1589,7 +1266,7 @@ faculty |>
 can create a prettier plot pretty easily
 
 ```{r}
-#| label: a71
+#| label: a53
 #| code-fold: true
 #| code-summary: "expand for full code"
 #| fig-align: "center"
@@ -1613,7 +1290,7 @@ faculty |>
 <br>
 
 ```{r}
-#| label: a72
+#| label: a54
 #| code-line-numbers: "1-2|3|4"
 #| eval: false
 fac_enr |> 
@@ -1625,7 +1302,7 @@ fac_enr |>
 . . .
 
 ```{r}
-#| label: a73
+#| label: a55
 #| echo: false
 #| fig-height: 4
 #| fig-align: "center"
@@ -1640,7 +1317,7 @@ fac_enr |>
 ## Line graph
 
 ```{r}
-#| label: a74
+#| label: a56
 #| code-fold: true
 #| code-summary: "expand for full code"
 #| fig-align: "center"
@@ -1792,3 +1469,7 @@ the [RStudio Education](https://education.rstudio.com/) site
 <br>
 
 the [Learn `tidyverse`](https://www.tidyverse.org/learn/) site
+
+<!--
+vim: cole=0
+-->
