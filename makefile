@@ -1,7 +1,7 @@
 # Makefile for managing the Quarto project
 
 # Variables
-BUILD_DIRS := _freeze dist .quarto
+BUILD_DIRS := _freeze dist .quarto index_cache index_files
 PREVIEW_LOG := preview.log
 CLEAN_CMD := rm -rf $(BUILD_DIRS) $(PREVIEW_LOG)
 QUARTO := quarto

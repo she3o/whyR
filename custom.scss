@@ -39,6 +39,20 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 	border-left: 10px solid;
 }
 
+.numbers {
+	@extend .sectionhead;
+	position: fixed;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+
+}
+
+.data-table {
+	@extend .fragment;
+	font-size: 0.45em;
+}
+
 .blackbox {
 	color: #000000;
 	background-color: transparent;
@@ -58,4 +72,8 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 
 .reveal .slides .Reactable {
 	background-color: $body-bg;
+}
+
+.reveal .slides .logos img {
+	max-height: 5em;
 }

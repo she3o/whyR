@@ -1,3 +1,39 @@
+```{r} 
+#| label: a1
+#| echo: false
+
+opts <- options(knitr.kable.NA = "")
+reactable <- function(...) {
+  reactable::reactable(..., wrap = F, resizable = T, bordered = T)
+
+}
+
+knit_print.data.frame = function(x, ...) {
+  html = as.character(htmltools::as.tags(reactable(x,static = TRUE)))
+  res = paste0("<div class='kable_wrapper'>", html, "</div>")
+  knitr::asis_output(res)
+}
+
+registerS3method(
+  "knit_print", "data.frame", knit_print.data.frame,
+  envir = asNamespace("knitr")
+)
+
+```
+
+```{r}
+#| label: a2
+#| echo: false
+library(tidyverse)
+library(data.table)
+faculty <- read_csv("data/faculty.csv")
+courses <- read_csv("data/courses.csv")
+# brca <- readRDS("data/unstranded.rds")
+genes <- readRDS("data/rowdata.rds") |> janitor::remove_constant()
+clin <- readRDS("data/coldata.rds") |> janitor::remove_constant()
+assay <- readRDS("data/assay.rds")
+```
+
 ## Attribution
 These slides draw heavily from slides created by [@meghall06].
 
@@ -18,10 +54,8 @@ These slides draw heavily from slides created by [@meghall06].
 
 # What is R?
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 1 [2 3 4 5 6]{style="opacity:0.25"}
-:::
 :::
 
 ---
@@ -120,11 +154,15 @@ The R language is the vehicle of choice for research in statistical methodology,
 
 ## Getting R
 
-You need the [R language](https://cloud.r-project.org/)
+::: {.logos}
+[![](https://www.r-project.org/logo/Rlogo.svg)](https://cloud.r-project.org/)
+[![](https://upload.wikimedia.org/wikipedia/commons/d/d0/RStudio_logo_flat.svg)](https://posit.co/download/rstudio-desktop/#download)
 
-. . .
+or: 
 
-And also [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
+[![](http://mybinder.org/badge_logo.svg)](http://mybinder.org/v2/gh/she3o/whyR/master?urlpath=rstudio)
+:::
+
 
 ---
 
@@ -175,7 +213,7 @@ You use R via *packages*
 
 ::: {.column width="50%"}
 ::: {.fragment}
-![](tidyverse.png){.absolute top="70" left="530" height="574" width="499"}
+![](images/tidyverse.webp){.absolute top="70" left="530" height="574" width="499"}
 :::
 :::
 
@@ -183,21 +221,6 @@ You use R via *packages*
 
 ## data
 
-```{r}
-#| echo: false
-library(tidyverse)
-library(data.table)
-faculty <- read_csv("data/faculty.csv")
-courses <- read_csv("data/courses.csv")
-# brca <- readRDS("data/unstranded.rds")
-genes <- readRDS("data/rowdata.rds") |> janitor::remove_constant()
-clin <- readRDS("data/coldata.rds") |> janitor::remove_constant()
-assay <- readRDS("data/assay.rds")
-opts <- options(knitr.kable.NA = "")
-reactable <- function(...) {
-  reactable::reactable(..., wrap = F, resizable = T, bordered = T)
-}
-```
 
 ::: {style="text-align: center"}
 `genes` has `{r} ncol(genes) ` columns and `{r} nrow(genes)` rows.
@@ -207,8 +230,9 @@ reactable <- function(...) {
 
 ::: {style="font-size: 0.75em"}
 ```{r}
+#| label: a3
 #| echo: false
-genes |> reactable(filterable = T)
+genes #|> reactable(filterable = T)
 ```
 :::
 
@@ -222,9 +246,9 @@ genes |> reactable(filterable = T)
 
 ::: {style="font-size: 0.75em"}
 ```{r}
+#| label: a4
 #| echo: false
-clin[, c("treatments", "disease_type"):=NULL] |>
-  reactable(filterable = T)
+clin[, c("treatments", "disease_type"):=NULL]
 ```
 :::
 
@@ -237,16 +261,15 @@ clin[, c("treatments", "disease_type"):=NULL] |>
 <br>
 
 ```{r}
+#| label: a5
 #| echo: false
 # print(assay[1:100,1:100])
 ```
 
 # Basic data manipulation
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 [1]{style="opacity:0.25"} 2 [3 4 5 6]{style="opacity:0.25"}
-:::
 :::
 
 ---
@@ -268,12 +291,6 @@ clin[, c("treatments", "disease_type"):=NULL] |>
 "save as" 
 :::
 :::
-
-::: {.column width="55%"}
-::: {style="font-size: 1.5em"}
-`Alt + -` 
-:::
-:::
 :::
 
 . . .
@@ -288,12 +305,6 @@ clin[, c("treatments", "disease_type"):=NULL] |>
 ::: {.column width="30%"}
 ::: {style="font-size: 1.5em; text-align: center"}
 "and then" 
-:::
-:::
-
-::: {.column width="55%"}
-::: {style="font-size: 1.5em"}
-`Ctrl + shift + m`
 :::
 :::
 :::
@@ -336,34 +347,28 @@ data |>`
 
 ## Filter
 
-<br>
 
 `filter` keeps or discards rows (aka observations)
 
 the `==` operator tests for equality
 
-<br>
 
-::: columns
-::: {.column width="50%"}
 ```{r}
+#| label: a6
 #| eval: false
 genes |>
   filter(gene_type == "miRNA")
 ```
-:::
 
-::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+. . .
+
 ```{r}
+#| label: b1
+#| eval: true
 #| echo: false
-knitr::kable(genes |> filter(gene_type == "miRNA") |> head(6))
+reactable(genes |>
+  filter(gene_type == "miRNA"))
 ```
-:::
-:::
-:::
-:::
 
 ---
 
@@ -378,7 +383,7 @@ the `|` operator signifies "or"
 ::: columns
 ::: {.column width="50%"}
 ```{r}
-#| eval: false
+#| label: a7
 clin |> 
  filter(paper_pathologic_stage == "Stage_II" |
            paper_pathologic_stage == "Stage_III")
@@ -386,16 +391,16 @@ clin |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a8
 #| echo: false
-reactable( clin |> filter(paper_pathologic_stage == "Stage_II" | paper_pathologic_stage == "Stage_III"))
+# reactable(.Last.value)
 ```
 :::
 :::
 :::
-:::
+
 
 ---
 
@@ -410,6 +415,7 @@ the `%in%` operator allows for multiple options in a list
 ::: columns
 ::: {.column width="51%"}
 ```{r}
+#| label: a9
 #| eval: false
 genes |> 
   filter(gene_type %in% c("BRCA1",
@@ -419,9 +425,9 @@ genes |>
 :::
 
 ::: {.column width="49%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a10
 #| echo: false
 reactable(genes |> 
   filter(gene_type %in% c("BRCA1",
@@ -429,7 +435,6 @@ reactable(genes |>
                       "PTEN"))
 )
 ```
-:::
 :::
 :::
 :::
@@ -447,6 +452,7 @@ the `&` operator combines conditions
 ::: columns
 ::: {.column width="51%"}
 ```{r}
+#| label: a11
 #| eval: false
 faculty |> 
   filter(dept1 %in% c("Sociology",
@@ -457,13 +463,12 @@ faculty |>
 :::
 
 ::: {.column width="49%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a12
 #| echo: false
-knitr::kable(faculty |> filter(dept1 %in% c("Sociology","Physics","Music") & rank == "Professor") |> head(6))
+reactable(faculty |> filter(dept1 %in% c("Sociology","Physics","Music") & rank == "Professor"))
 ```
-:::
 :::
 :::
 :::
@@ -481,6 +486,7 @@ knitr::kable(faculty |> filter(dept1 %in% c("Sociology","Physics","Music") & ran
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a13
 #| eval: false
 faculty |> 
   select(id, dept1, rank)
@@ -488,13 +494,12 @@ faculty |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a14
 #| echo: false
-knitr::kable(faculty |> select(id, dept1, rank) |> head(6))
+reactable(faculty |> select(id, dept1, rank))
 ```
-:::
 :::
 :::
 :::
@@ -512,6 +517,7 @@ can drop columns with -`column`
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a15
 #| eval: false
 faculty |> 
   select(-dept2)
@@ -519,13 +525,12 @@ faculty |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a16
 #| echo: false
-knitr::kable(faculty |> select(-dept2) |> head(6))
+reactable(faculty |> select(-dept2))
 ```
-:::
 :::
 :::
 :::
@@ -543,6 +548,7 @@ the pipe `|>` chains multiple functions together
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a17
 #| eval: false
 faculty |> 
  select(id, dept1, rank) |>
@@ -551,13 +557,12 @@ faculty |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a18
 #| echo: false
-knitr::kable(faculty |> select(id, dept1, rank) |> filter(rank == "Professor") |> head(6))
+reactable(faculty |> select(id, dept1, rank) |> filter(rank == "Professor"))
 ```
-:::
 :::
 :::
 :::
@@ -577,20 +582,20 @@ use `desc()` to get descending order
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a19
 #| eval: false
-courses |> 
-  arrange(desc(enrollment))
+clin |> 
+  arrange(desc(age_at_diagnosis))
 ```
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a20
 #| echo: false
-knitr::kable(courses |> arrange(desc(enrollment)) |> head(6))
+reactable(clin |> arrange(desc(age_at_diagnosis)))
 ```
-:::
 :::
 :::
 :::
@@ -608,6 +613,7 @@ can sort by multiple variables
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a21
 #| eval: false
 courses |> 
   arrange(dept, desc(enrollment))
@@ -615,13 +621,12 @@ courses |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a22
 #| echo: false
-knitr::kable(courses |> arrange(dept, desc(enrollment)) |> head(6))
+reactable(courses |> arrange(dept, desc(enrollment)))
 ```
-:::
 :::
 :::
 :::
@@ -639,6 +644,7 @@ knitr::kable(courses |> arrange(dept, desc(enrollment)) |> head(6))
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a23
 #| eval: false
 courses |> 
   count(dept)
@@ -646,13 +652,12 @@ courses |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a24
 #| echo: false
-knitr::kable(courses |> count(dept) |> head(6))
+reactable(courses |> count(dept))
 ```
-:::
 :::
 :::
 :::
@@ -670,6 +675,7 @@ can use `sort = TRUE` to order results
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a25
 #| eval: false
 courses |> 
   count(dept, level, sort = TRUE)
@@ -677,13 +683,12 @@ courses |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a26
 #| echo: false
-knitr::kable(courses |> count(dept, level, sort = TRUE))
+reactable(courses |> count(dept, level, sort = TRUE))
 ```
-:::
 :::
 :::
 :::
@@ -701,6 +706,7 @@ knitr::kable(courses |> count(dept, level, sort = TRUE))
 ::: columns
 ::: {.column width="50%"}
 ```{r}
+#| label: a27
 #| eval: false
 faculty |> 
   mutate(new = "hello!")
@@ -708,13 +714,12 @@ faculty |>
 :::
 
 ::: {.column width="50%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a28
 #| echo: false
-knitr::kable(faculty |> mutate(new = "hello!") |> head(6))
+reactable(faculty |> mutate(new = "hello!"))
 ```
-:::
 :::
 :::
 :::
@@ -734,6 +739,7 @@ condition, value if true, value if false
 ::: columns
 ::: {.column width="70%"}
 ```{r}
+#| label: a29
 #| eval: false
 faculty |> 
   mutate(prof = ifelse(rank == "Professor",
@@ -743,14 +749,13 @@ faculty |>
 :::
 
 ::: {.column width="30%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a30
 #| echo: false
-knitr::kable(faculty |> mutate(prof = ifelse(rank == "Professor",
-                       1, 0)) |> select(rank, prof) |> head(6))
+reactable(faculty |> mutate(prof = ifelse(rank == "Professor",
+                       1, 0)) |> select(rank, prof))
 ```
-:::
 :::
 :::
 :::
@@ -770,6 +775,7 @@ the `!` operator means *not*
 ::: columns
 ::: {.column width="60%"}
 ```{r}
+#| label: a31
 #| eval: false
 faculty |> 
   mutate(joint = ifelse(!is.na(dept2),
@@ -780,14 +786,13 @@ faculty |>
 :::
 
 ::: {.column width="40%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a32
 #| echo: false
-knitr::kable(faculty |> mutate(joint = ifelse(!is.na(dept2),
-                        "joint", NA)) |> select(dept1, dept2, joint) |> head(6))
+reactable(faculty |> mutate(joint = ifelse(!is.na(dept2),
+                        "joint", NA)) |> select(dept1, dept2, joint))
 ```
-:::
 :::
 :::
 :::
@@ -801,6 +806,7 @@ knitr::kable(faculty |> mutate(joint = ifelse(!is.na(dept2),
 with multiple conditions, `case_when()` is much easier!
 
 ```{r}
+#| label: a33
 #| eval: false
 faculty |> 
   mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
@@ -812,19 +818,18 @@ faculty |>
   select(dept1, division)
 ```
 
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a34
 #| echo: false
-knitr::kable(faculty |> mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
+reactable(faculty |> mutate(division = case_when(dept1 %in% c("Sociology","Political Science") ~
                                 "Social Sciences",
                               dept1 %in% c("Music","English") ~
                                 "Humanities",
                               dept1 %in% c("Chemistry","Physics") ~
                                "Sciences")) |>
-  select(dept1, division) |> head(6))
+  select(dept1, division))
 ```
-:::
 :::
 
 ---
@@ -842,6 +847,7 @@ knitr::kable(faculty |> mutate(division = case_when(dept1 %in% c("Sociology","Po
 ::: columns
 ::: {.column width="60%"}
 ```{r}
+#| label: a35
 #| eval: false
 courses |> 
  group_by(dept, semester) |>
@@ -850,15 +856,14 @@ courses |>
 :::
 
 ::: {.column width="40%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a36
 #| echo: false
-knitr::kable(courses |> 
+reactable(courses |> 
  group_by(dept, semester) |>
-  summarize(enr = sum(enrollment)) |> head(6))
+  summarize(enr = sum(enrollment)))
 ```
-:::
 :::
 :::
 :::
@@ -878,6 +883,7 @@ useful arguments within `summarize`:
 ::: columns
 ::: {.column width="67%"}
 ```{r}
+#| label: a37
 #| eval: false
 courses |> 
  group_by(dept, semester) |>
@@ -887,54 +893,23 @@ courses |>
 :::
 
 ::: {.column width="33%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a38
 #| echo: false
-knitr::kable(courses |> 
+reactable(courses |> 
  group_by(dept, semester) |>
   summarize(enr = sum(enrollment),
-            courses = n_distinct(course_id)) |> head(6))
+            courses = n_distinct(course_id)))
 ```
-:::
 :::
 :::
 :::
 
 # Using R effectively
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 [1 2]{style="opacity:0.25"} 3 [4 5 6]{style="opacity:0.25"}
-:::
-:::
-
----
-
-## Working in RStudio
-
-::: {.absolute top="10%" left="0" width="1031" height="529"}
-::: {style="text-align: center"}
-![](RStudio2.png)
-:::
-:::
-
-::: {.absolute top="66%" left="55%"}
-::: {style="color: #cc0000"}
-project files are here
-:::
-:::
-
-::: {.absolute top="28%" left="70%"}
-::: {style="color: #cc0000"}
-imported data shows up here
-:::
-:::
-
-::: {.absolute top="35%" left="25%"}
-::: {style="color: #cc0000"}
-code can also<br>go here
-:::
 :::
 
 ---
@@ -972,22 +947,70 @@ code can also<br>go here
 packages need to be installed on each computer you use
 
 ```{r}
+#| label: a39
 #| eval: false
-# only need to do this once (per computer)
-install.packages("tidyverse")
+install.packages("tidyverse") # <1>
 ```
+1. only need to do this once (per computer)
+
+. . .
+
+Most commonly validated packages exist on CRAN.
+So they can be installed with `install.packages`.
+
+. . .
+
+You can browse all CRAN packages [here](https://cran.r-project.org/web/views/)
+
+---
+
+## Working with packages
+
+Packages that specialize in the analysis biological data are often hosted on **Bioconductor**.
+
+. . .
+
+They can be installed as follows:
+
+```{r} 
+#| label: a40
+#| eval: false
+if (!require("BiocManager", quietly = TRUE)) # <1>
+    install.packages("BiocManager") # <1>
+
+BiocManager::install("limma") # <2>
+```
+1. Install the Bioconductor installer like any other package
+2. Install packages hosted on Bioconductor
+
+. . .
+
+You can browse all R Bioconductor packages [here](https://bioconductor.org/packages/release/BiocViews.html)
+
+---
+
+## Working with packages
+
+[R-universe](https://r-universe.dev/search) indexes all R packages on the web.
+
+. . .
+
+Journals and regulatory bodies don't allow the use of arbitrary packages in submitted documents!
+
+---
+
+## Working with packages
 
 <br>
 
-::: {.fragment}
 packages need to be loaded/attached with `library()` at the beginning of every session
 
 ```{r}
+#| label: a41
 #| eval: false
 # always put the necessary packages at the top of a code file
 library(tidyverse)
 ```
-:::
 
 <br>
 
@@ -1015,49 +1038,7 @@ keeps code files and data files together, allowing for easier file path navigati
 
 <br>
 
-more guidance: [here](https://support.rstudio.com/hc/en-us/articles/200526207-Using-RStudio-Projects) and [here](https://r4ds.had.co.nz/workflow-projects.html#rstudio-projects)
-
----
-
-## Organizing with projects
-
-::: {.absolute top="10%" left="0" width="1031" height="529"}
-::: {style="text-align: center"}
-![](RStudio2.png)
-:::
-:::
-
-::: {.absolute top="66%" left="55%"}
-::: {style="color: #cc0000"}
-project files are here
-:::
-:::
-
-::: {.absolute top="28%" left="70%"}
-::: {style="color: #cc0000"}
-imported data shows up here
-:::
-:::
-
-::: {.absolute top="35%" left="25%"}
-::: {style="color: #cc0000"}
-code can also<br>go here
-:::
-:::
-
----
-
-## Accessing workshop materials
-
-::: {.absolute top="40%" left="0"}
-::: {style="text-align: center"}
-![](GitHub.png)
-:::
-:::
-
-<br>
-
-click big green Code button and select "Download ZIP", then open `neair.Rproj`
+more guidance: [here](https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects) and [here](https://r4ds.had.co.nz/workflow-projects.html#rstudio-projects)
 
 ---
 
@@ -1066,6 +1047,7 @@ click big green Code button and select "Download ZIP", then open `neair.Rproj`
 use `read_csv()` to import a csv file
 
 ```{r}
+#| label: a42
 #| eval: false
 # the file path is this simple if you use projects!
 # ?read_csv() in the console will bring up the help file with more options
@@ -1078,6 +1060,7 @@ faculty <- read_csv("faculty.csv")
 the [readxl](https://readxl.tidyverse.org/) package is helpful for Excel files
 
 ```{r}
+#| label: a43
 #| eval: false
 # needs to be loaded but not installed as it's part of the tidyverse
 library(readxl)
@@ -1091,12 +1074,36 @@ faculty <- read_excel("faculty.xlsx", sheet = 2)
 view the data with `View(faculty)` or by clicking on the data name in the Environment pane
 :::
 
+---
+
+## Accessing TCGA data
+
+Most biological databases offer R packages that automate data retrieval.
+
+```{r} 
+#| label: a44
+#| eval: false
+library(TCGAbiolinks) # <1>
+
+query <- GDCquery( # <2>
+  project = "TCGA-BRCA", # <2>
+  data.category = "Transcriptome Profiling", # <2>
+  data.type = "Gene Expression Quantification", # <2>
+  workflow.type = "STAR - Counts" # <2>
+) # <2>
+
+GDCdownload(query) # <3>
+assay <- GDCprepare(query) # <4>
+```
+1. Load the `TCGAbiolinks` package to interact with TCGA servers.
+2. Send a query to TCGA.
+3. Download the queried data to your computer.
+4. Transform and import the downloaded data to a suitable format.
+
 # More data manipulation
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 [1 2 3]{style="opacity:0.25"} 4 [5 6]{style="opacity:0.25"}
-:::
 :::
 
 ---
@@ -1110,6 +1117,7 @@ functions from `stringr` (which all start with `str_`) are useful for working wi
 ::: columns
 ::: {.column width="58%"}
 ```{r}
+#| label: a45
 #| eval: false
 faculty |> 
   filter(str_detect(rank, "Professor"))
@@ -1117,14 +1125,13 @@ faculty |>
 :::
 
 ::: {.column width="42%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a46
 #| echo: false
-knitr::kable(faculty |> 
-  filter(str_detect(rank, "Professor")) |> head(6))
+reactable(faculty |> 
+  filter(str_detect(rank, "Professor")))
 ```
-:::
 :::
 :::
 :::
@@ -1142,6 +1149,7 @@ cheat sheet of functions is [here](https://github.com/rstudio/cheatsheets/blob/m
 ::: columns
 ::: {.column width="75%"}
 ```{r}
+#| label: a47
 #| eval: false
 courses |> 
  mutate(year = str_c(str_sub(semester, 1, 4),
@@ -1153,16 +1161,15 @@ courses |>
 :::
 
 ::: {.column width="25%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a48
 #| echo: false
-knitr::kable(courses |> 
+reactable(courses |> 
  mutate(year = str_c(str_sub(semester, 1, 4),
                       "-",
                       str_sub(semester, 5, 6))) |> select(semester, year) |> unique())
 ```
-:::
 :::
 :::
 :::
@@ -1177,8 +1184,9 @@ existing `faculty` data has one row per faculty, some with multiple departments 
 
 ::: {style="font-size: 0.75em"}
 ```{r}
+#| label: a49
 #| echo: false
-knitr::kable(faculty |> head(6))
+reactable(faculty)
 ```
 :::
 
@@ -1192,12 +1200,13 @@ what if you instead want one row per faculty *per department*? (sometimes known 
 
 ::: {style="font-size: 0.75em"}
 ```{r}
+#| label: a50
 #| echo: false
-knitr::kable(faculty |> 
+reactable(faculty |> 
   pivot_longer(dept1:dept2,
                names_to = "dept_no",
                values_to = "dept",
-               values_drop_na = TRUE) |> head(6))
+               values_drop_na = TRUE))
 ```
 :::
 
@@ -1214,6 +1223,7 @@ the `pivot_longer` function lengthens data
 ::: columns
 ::: {.column width="66%"}
 ```{r}
+#| label: a51
 #| eval: false
 faculty |> 
   pivot_longer(dept1:dept2,
@@ -1225,18 +1235,17 @@ faculty |>
 :::
 
 ::: {.column width="34%"}
-::: {.fragment}
-::: {style="font-size: 0.45em"}
+::: {.data-table}
 ```{r}
+#| label: a52
 #| echo: false
-knitr::kable(faculty |> 
+reactable(faculty |> 
   pivot_longer(dept1:dept2,
                names_to = "dept_no",
                values_to = "dept",
               values_drop_na = TRUE) |>
-  select(-year, -rank) |> head(6))
+  select(-year, -rank))
 ```
-:::
 :::
 :::
 :::
@@ -1251,8 +1260,9 @@ and `pivot_wider` does the opposite!
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a53
 #| echo: false
-knitr::kable(courses |> head(2))
+reactable(courses |> head(2))
 ```
 :::
 
@@ -1261,6 +1271,7 @@ knitr::kable(courses |> head(2))
 <br>
 
 ```{r}
+#| label: a54
 #| eval: false
 courses |> 
   pivot_wider(names_from = "level",
@@ -1269,8 +1280,9 @@ courses |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a55
 #| echo: false
-knitr::kable(courses |> 
+reactable(courses |> 
   pivot_wider(names_from = "level",
               values_from = "enrollment") |> head(4))
 ```
@@ -1306,8 +1318,9 @@ what's the average UG enrollment per year, per faculty rank?
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a56
 #| echo: false
-knitr::kable(faculty |> head(4))
+reactable(faculty |> head(4))
 ```
 :::
 
@@ -1317,8 +1330,9 @@ knitr::kable(faculty |> head(4))
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a57
 #| echo: false
-knitr::kable(courses |> head(4))
+reactable(courses |> head(4))
 ```
 :::
 
@@ -1340,8 +1354,9 @@ what's the average [UG enrollment per year, per faculty]{style="color: #cc0000"}
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a58
 #| echo: false
-knitr::kable(courses |> head(5))
+reactable(courses |> head(5))
 ```
 :::
 
@@ -1360,6 +1375,7 @@ knitr::kable(courses |> head(5))
 use the `<-` operator to create a new data frame `courses_UG`
 
 ```{r}
+#| label: a59
 #| eval: false
 #| code-line-numbers: "1"
 courses_UG <- courses |> 
@@ -1378,6 +1394,7 @@ courses_UG <- courses |>
 `filter` to undergraduate courses only and `mutate` a new academic year variable
 
 ```{r}
+#| label: a60
 #| eval: false
 #| code-line-numbers: "2-5"
 courses_UG <- courses |> 
@@ -1396,6 +1413,7 @@ courses_UG <- courses |>
 `group_by` year and faculty member; `summarize` enrollment
 
 ```{r}
+#| label: a61
 #| code-line-numbers: "6-7"
 courses_UG <- courses |> 
  filter(level == "UG") |>
@@ -1412,8 +1430,9 @@ courses_UG <- courses |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a62
 #| echo: false
-knitr::kable(courses_UG |> head(4))
+reactable(courses_UG |> head(4))
 ```
 :::
 
@@ -1432,8 +1451,9 @@ what's the average UG enrollment per year, per faculty rank?
 :::
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a63
 #| echo: false
-knitr::kable(faculty |> head(6))
+reactable(faculty)
 ```
 :::
 :::
@@ -1444,8 +1464,9 @@ knitr::kable(faculty |> head(6))
 :::
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a64
 #| echo: false
-knitr::kable(courses_UG |> arrange(desc(year)) |> head(6))
+reactable(courses_UG |> arrange(desc(year)))
 ```
 :::
 :::
@@ -1458,6 +1479,7 @@ knitr::kable(courses_UG |> arrange(desc(year)) |> head(6))
 <br>
 
 ```{r}
+#| label: a65
 fac_enr <- faculty |>
   left_join(courses_UG, by = c("id" = "faculty_id",
                                "year" = "year"))
@@ -1471,8 +1493,9 @@ fac_enr <- faculty |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a66
 #| echo: false
-knitr::kable(fac_enr |> head(6))
+reactable(fac_enr)
 ```
 :::
 
@@ -1485,6 +1508,7 @@ knitr::kable(fac_enr |> head(6))
 what's the average UG enrollment per year, per faculty rank?
 
 ```{r}
+#| label: a67
 #| code-line-numbers: "4-5"
 fac_enr <- faculty |> 
   left_join(courses_UG, by = c("id" = "faculty_id",
@@ -1499,17 +1523,16 @@ fac_enr <- faculty |>
 
 ::: {style="font-size: 0.45em"}
 ```{r}
+#| label: a68
 #| echo: false
-knitr::kable(fac_enr |> arrange(desc(year)) |> head(6))
+reactable(fac_enr |> arrange(desc(year)))
 ```
 :::
 
 # Data visualization
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 [1 2 3 4]{style="opacity:0.25"} 5 [6]{style="opacity:0.25"}
-:::
 :::
 
 ## ggplot2
@@ -1533,6 +1556,7 @@ encoding data into visual cues (e.g., length, color, position, size) is how we s
 ## Bar chart
 
 ```{r}
+#| label: a69
 #| code-line-numbers: "1-2|3|4"
 #| eval: false
 faculty |>
@@ -1548,6 +1572,7 @@ to combine lines into one code chunk, use `+` instead of `|>`
 . . .
 
 ```{r}
+#| label: a70
 #| echo: false
 #| fig-height: 4
 #| fig-align: "center"
@@ -1564,6 +1589,7 @@ faculty |>
 can create a prettier plot pretty easily
 
 ```{r}
+#| label: a71
 #| code-fold: true
 #| code-summary: "expand for full code"
 #| fig-align: "center"
@@ -1587,6 +1613,7 @@ faculty |>
 <br>
 
 ```{r}
+#| label: a72
 #| code-line-numbers: "1-2|3|4"
 #| eval: false
 fac_enr |> 
@@ -1598,6 +1625,7 @@ fac_enr |>
 . . .
 
 ```{r}
+#| label: a73
 #| echo: false
 #| fig-height: 4
 #| fig-align: "center"
@@ -1612,6 +1640,7 @@ fac_enr |>
 ## Line graph
 
 ```{r}
+#| label: a74
 #| code-fold: true
 #| code-summary: "expand for full code"
 #| fig-align: "center"
@@ -1676,10 +1705,8 @@ with what we've done so far, your `.R` file could:
 
 # Advanced topics
 
-::: {.absolute top="0" left="100%"}
-::: {.sectionhead}
+::: {.numbers}
 [1 2 3 4 5]{style="opacity:0.25"} 6
-:::
 :::
 
 ## R Markdown

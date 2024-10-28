@@ -1,15 +1,19 @@
 project:
   title: "Why R?"
   output-dir: dist
+  preview:
+    port: 4099
+    browser: false
 
 title: Why R?
+code-links: binder
 authors:
   - name: Anas Shashaey
     affiliation: Biochemistry Dept., Faculty of Pharmacy - Ain Shams University
 from: markdown+emoji
 execute:
   echo: true
-  freeze: true
+  cache: true
 bibliography: references.bib
 date: today
 format:
@@ -29,4 +33,3 @@ format:
     center: true
     chalkboard: 
       boardmarker-width: 5
-
