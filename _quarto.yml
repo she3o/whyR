@@ -1,11 +1,11 @@
 project:
-  title: "Why R?"
+  title: "Analysis of Biological Data with R"
   output-dir: dist
   preview:
     port: 4099
     browser: false
 
-title: Why R?
+title: Analysis of Biological Data with R
 code-links: binder
 authors:
   - name: Anas Shashaey
@@ -22,14 +22,14 @@ format:
     lightbox: true
     controls: true
     navigation-mode: vertical
-    controls-back-arrows: hidden
-    slide-number: true
-    menu: false
+    # controls-back-arrows: hidden
+    # slide-number: true
+    # menu: false
     incremental: false
     preview-links: true
-    footer: Why R?
+    # footer: Why R?
     smaller: true
     theme: [moon, custom.scss]
-    center: true
+    # center: true
     chalkboard: 
       boardmarker-width: 5

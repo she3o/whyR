@@ -1,0 +1,331 @@
+# More data manipulation
+
+---
+
+## Stringr functions
+
+functions from `stringr` (which all start with `str_`) are useful for working with text data
+
+```{r}
+#| label: FvD4eWDE
+faculty |> 
+  filter(str_detect(rank, "Professor"))
+```
+
+---
+
+## Stringr functions
+
+cheat sheet of functions is [here](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
+
+```{r}
+#| label: jDYNiD95
+courses |> 
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                     str_sub(semester, 5, 6))) |>
+ select(semester, year) |>
+  unique()
+```
+
+---
+
+## Pivoting data
+
+existing `faculty` data has one row per faculty, some with multiple departments (sometimes known as *wide* data)
+
+```{r}
+#| label: PdAZ6sVm
+#| echo: false
+faculty
+```
+
+---
+
+## Pivoting data
+
+what if you instead want one row per faculty *per department*? (sometimes known as *long* data)
+
+::: {style="font-size: 0.75em"}
+```{r}
+#| label: LDiVy9Jj
+#| echo: false
+faculty |> 
+  pivot_longer(dept1:dept2,
+               names_to = "dept_no",
+               values_to = "dept",
+               values_drop_na = TRUE)
+```
+:::
+
+---
+
+## Pivoting data
+
+the `pivot_longer` function lengthens data
+
+```{r}
+#| label: hOmZeFU9
+faculty |> 
+  pivot_longer(dept1:dept2,
+               names_to = "dept_no",
+               values_to = "dept",
+              values_drop_na = TRUE) |>
+  select(-year, -rank)
+```
+
+---
+
+## Pivoting data
+
+and `pivot_wider` does the opposite!
+
+```{r}
+#| label: UrRBVwal
+#| echo: false
+courses |> head(2)
+```
+
+. . .
+
+```{r}
+#| label: hYMhZhoP
+courses |> 
+  pivot_wider(names_from = "level",
+              values_from = "enrollment")
+```
+
+---
+
+## Joining data
+
+R has many useful functions for handling [relational data]{style="color: #cc0000"}
+
+all you need is at least one [key variable]{style="color: #cc0000"} that connects data sets
+
+`left_join` is most common, but there are [more](https://r4ds.had.co.nz/relational-data.html)
+
+---
+
+## Joining data
+
+what's the average UG enrollment per year, per faculty rank?
+
+. . .
+
+::: {style="text-align: center"}
+`faculty`
+:::
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: uYMG9c5j
+#| echo: false
+reactable(faculty |> head(4))
+```
+:::
+
+::: {style="text-align: center"}
+`courses`
+:::
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: H0qngHgq
+#| echo: false
+reactable(courses |> head(4))
+```
+:::
+
+. . .
+
+::: {style="text-align: center"}
+`faculty$id` is the same as `courses$faculty_id`
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average [UG enrollment per year, per faculty]{style="color: #cc0000"} rank?
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: AUDNCk0N
+#| echo: false
+reactable(courses |> head(5))
+```
+:::
+
+. . .
+
+- filter to `UG` courses only
+- create our `year` variable again 
+- summarize `enrollment` by `year` and `faculty_id`
+
+---
+
+## Joining data
+
+<br>
+
+use the `<-` operator to create a new data frame `courses_UG`
+
+```{r}
+#| label: 9qvUaazn
+#| eval: false
+#| code-line-numbers: "1"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                      str_sub(semester, 5, 6)))
+```
+
+---
+
+## Joining data
+
+<br>
+
+`filter` to undergraduate courses only and `mutate` a new academic year variable
+
+```{r}
+#| label: nAtYjRDS
+#| eval: false
+#| code-line-numbers: "2-5"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                      str_sub(semester, 5, 6)))
+```
+
+---
+
+## Joining data
+
+<br>
+
+`group_by` year and faculty member; `summarize` enrollment
+
+```{r}
+#| label: eCjPNX9K
+#| code-line-numbers: "6-7"
+courses_UG <- courses |> 
+ filter(level == "UG") |>
+ mutate(year = str_c(str_sub(semester, 1, 4),
+                      "-",
+                     str_sub(semester, 5, 6))) |>
+ group_by(year, faculty_id) |>
+  summarize(enr = sum(enrollment))
+```
+
+. . .
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: kTQK69PX
+#| echo: false
+reactable(courses_UG |> head(4))
+```
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average UG enrollment per year, per faculty rank?
+
+::: columns
+::: {.column width="60%"}
+::: {style="text-align: center"}
+`faculty`
+:::
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: 5QHaj4sN
+#| echo: false
+reactable(faculty)
+```
+:::
+:::
+
+::: {.column width="40%"}
+::: {style="text-align: center"}
+`courses_UG`
+:::
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: j5NMOXnN
+#| echo: false
+reactable(courses_UG |> arrange(desc(year)))
+```
+:::
+:::
+:::
+
+---
+
+## Joining data
+
+<br>
+
+```{r}
+#| label: gbg2U6Hc
+fac_enr <- faculty |>
+  left_join(courses_UG, by = c("id" = "faculty_id",
+                               "year" = "year"))
+```
+
+1. `fac_enr`: new data frame
+2. `faculty`: data frame you're adding data to
+3. `courses_UG`: data frame where the new data is coming from
+
+. . .
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: y2Ff9q5s
+#| echo: false
+reactable(fac_enr)
+```
+:::
+
+---
+
+## Joining data
+
+<br>
+
+what's the average UG enrollment per year, per faculty rank?
+
+```{r}
+#| label: JshK57FJ
+#| code-line-numbers: "4-5"
+fac_enr <- faculty |> 
+  left_join(courses_UG, by = c("id" = "faculty_id",
+                              "year" = "year")) |>
+ group_by(year, rank) |>
+  summarize(avg_enr = mean(enr, na.rm = TRUE))
+```
+
+. . .
+
+<br>
+
+::: {style="font-size: 0.45em"}
+```{r}
+#| label: AD00Xlz3
+#| echo: false
+reactable(fac_enr |> arrange(desc(year)))
+```
+:::

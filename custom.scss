@@ -8,15 +8,6 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 
 /*-- scss:rules --*/
 
-.reveal .slide-number {
-	color: $link-color;
-}
-
-.reveal .footer {
-	font-size: 0.35em !important;
-	text-align: right !important;
-}
-
 .reveal .slides section .fragment.semi-fade-out {
 	opacity: 1;
 	visibility: inherit;
@@ -37,20 +28,6 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 	padding: 2px;
 	width: 120px;
 	border-left: 10px solid;
-}
-
-.numbers {
-	@extend .sectionhead;
-	position: fixed;
-	top: 50%;
-	right: 0;
-	transform: translateY(-50%);
-
-}
-
-.data-table {
-	@extend .fragment;
-	font-size: 0.45em;
 }
 
 .blackbox {
@@ -85,4 +62,8 @@ $code-block-border-color: #4b4a48; // Medium gray for borders
 
 .rt-pagination {
 	font-size: small;
+}
+
+.reveal .slides .rt-td-inner {
+	padding: 2px 2px;
 }

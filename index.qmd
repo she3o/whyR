@@ -8,7 +8,7 @@ reactable <- function(...) {
 
 knit_print.data.frame = function(x, ...) {
   html = as.character(htmltools::as.tags(reactable(x,static = TRUE)))
-  res = paste0("<div class='kable_wrapper'>", html, "</div>")
+  res = paste0("<div class='kable_wrapper'><br>", html, "</div>")
   knitr::asis_output(res)
 }
 
@@ -20,7 +20,7 @@ registerS3method(
 ```
 
 ```{r}
-#| label: a2
+#| label: MkFJ9WKu
 #| echo: false
 library(tidyverse)
 faculty <- read_csv("data/faculty.csv")
@@ -35,38 +35,30 @@ These slides draw heavily from slides created by [@meghall06].
 
 ## Outline
 
-<br>
-
 ::: {.incremental}
 - What is R? 
 - Basic data manipulation in R
 - Using R effectively
-- More data manipulation
-- Visualizing data
-- Bioconductor
-- The analysis of expression data
+- More data manipulation / WIP
+- Visualizing data / WIP
+- Bioconductor / WIP
+- The analysis of expression data / WIP
 - A peek at advanced topics
 :::
 
 # What is R?
 
-::: {.numbers}
-1 [2 3 4 5 6]{style="opacity:0.25"}
-:::
-
 ---
 
 ## What is R?
 
-::: {style="text-align: center"}
 R is an **open-source** scripting language and environment for working with data.
 
+. . . 
+
 Open-source means the software is free of charge. most importantly it means the we are **free** to inspect, use, modify and redistribute the software.
-:::
 
----
-
-## What is R?
+. . .
 
 The R language is the vehicle of choice for research in statistical methodology, bioinformatics research and pharmaceutical industry.
 
@@ -226,7 +218,7 @@ You use R via *packages*
 
 ::: {style="font-size: 0.75em"}
 ```{r}
-#| label: a3
+#| label: iWNAPYQa
 #| echo: false
 genes
 ```
@@ -242,7 +234,7 @@ genes
 
 ::: {style="font-size: 0.75em"}
 ```{r}
-#| label: a4
+#| label: hHTdyf5b
 #| echo: false
 clin
 ```
@@ -257,7 +249,7 @@ clin
 <br>
 
 ```{r}
-#| label: a5
+#| label: ey5xstNn
 #| echo: false
 display_assay <- assay[1:100,1:100]
 colnames(display_assay) <- NULL
@@ -266,10 +258,6 @@ display_assay
 ```
 
 # Basic data manipulation
-
-::: {.numbers}
-[1]{style="opacity:0.25"} 2 [3 4 5 6]{style="opacity:0.25"}
-:::
 
 ---
 
@@ -324,7 +312,7 @@ display_assay
 
 `group_by`/`summarize` aggregates data ([pivot tables]{style="color:#cc0000"}!)
 
-`str_*` functions work easily with text
+`str_*` functions work with text
 
 ---
 
@@ -354,7 +342,8 @@ the `==` operator tests for equality
 . . .
 
 ```{r}
-#| label: a6
+#| label: d1ABdY4A
+#| output-location: column-fragment
 genes |>
   filter(gene_type == "miRNA")
 ```
@@ -368,7 +357,9 @@ the `|` operator signifies "or"
 . . .
 
 ```{r}
-#| label: a7
+#| label: 5ZhV148X
+#| output-location: column-fragment
+#| code-line-numbers: "1|2-5"
 clin |> 
   filter(
     paper_pathologic_stage == "Stage_II" |
@@ -385,7 +376,9 @@ the `%in%` operator allows for multiple options in a list
 . . .
 
 ```{r}
-#| label: a8
+#| label: yvgIsawA
+#| output-location: column-fragment
+#| code-line-numbers: "1|2,4|3"
 genes |> 
   filter(
     gene_name %in% c("BRCA1", "TP53", "PTEN")
@@ -399,7 +392,9 @@ genes |>
 the `&` operator combines conditions
 
 ```{r}
-#| label: a9
+#| label: aW6LkBpL
+#| output-location: column-fragment
+#| code-line-numbers: "1|2,5|3|4"
 clin |> 
   filter(
     paper_pathologic_stage %in% c("Stage_I", "Stage_II") &
@@ -414,7 +409,9 @@ clin |>
 `select` keeps or discards columns (aka variables)
 
 ```{r}
-#| label: a10
+#| label: WljrJeak
+#| output-location: column-fragment
+#| code-line-numbers: "1,2,7|3-6"
 clin |> 
   select(
     patient,
@@ -431,7 +428,9 @@ clin |>
 can drop columns with `- column`
 
 ```{r}
-#| label: a11
+#| label: KBjCyG4x
+#| output-location: fragment
+#| code-line-numbers: "2-6"
 clin |> 
   select(
     -barcode,
@@ -447,12 +446,26 @@ clin |>
 the pipe `|>` chains multiple functions together
 
 ```{r}
-#| label: a12
+#| label: Mm9PKNY0
+#| output-location: column-fragment
+#| code-line-numbers: "1|2-4|5"
 genes |> 
   filter(
     gene_type == "lncRNA"
   ) |>
   pull(gene_name)
+```
+
+---
+
+## Select (Advanced)
+
+You can achieve the same result with less typing if you use cryptic R!
+
+```{r}
+#| eval: false
+genes %>%
+  .[.[, 3] == "lncRNA", 4]
 ```
 
 ---
@@ -464,8 +477,10 @@ genes |>
 use `desc()` to get descending order
 
 ```{r}
-#| label: a13
-clin |> 
+#| label: EK9GuHyT
+#| output-location: column-fragment
+#| code-line-numbers: "2"
+clin |>
   arrange(desc(age_at_diagnosis))
 ```
 
@@ -476,7 +491,9 @@ clin |>
 `count` tallies data set by certain variable(s) (very useful for familiarizing yourself with data)
 
 ```{r}
-#| label: a14
+#| label: hZevGbW3
+#| output-location: column-fragment
+#| code-line-numbers: "2"
 clin |> 
   count(gender)
 ```
@@ -488,7 +505,9 @@ clin |>
 can use `sort = TRUE` to order results
 
 ```{r}
-#| label: a15
+#| label: Tl7Zf76N
+#| output-location: column-fragment
+#| code-line-numbers: "2"
 clin |> 
   count(paper_pathologic_stage, sort = TRUE)
 ```
@@ -499,8 +518,13 @@ clin |>
 
 You can tally across all combinations of multiple variables
 
+
+. . .
+
 ```{r}
-#| label: a16
+#| label: 5i0kXe3J
+#| output-location: column-fragment
+#| code-line-numbers: "2-6"
 clin |> 
   count(
     paper_pathologic_stage,
@@ -516,27 +540,31 @@ clin |>
 `mutate` creates new variables (with a single `=`)
 
 ```{r}
-#| label: a17
-clin |> 
-  mutate(source = "TCGA")
+#| label: JC1nvb4i
+clin |> mutate(source = "TCGA")
 ```
 
 ---
 
 ## Mutate
 
-much more useful with a conditional such as `ifelse()`, which has three arguments:
+Much more useful with a conditional such as `ifelse()`, which has three arguments:
 
 condition, value if true, value if false
 
 ```{r}
-#| label: a18
+#| label: DkRfnDz3
+#| output-location: column-fragment
 clin |> count(ajcc_pathologic_m)
 ```
 ---
 
+## Mutate
+
 ```{r}
-#| label: a18
+#| label: u3yHTu4F
+#| output-location: column-fragment
+#| code-line-numbers: "1,2,7|3-6|1,2,7,8"
 clin |> 
   mutate(
     metastatic = ifelse(
@@ -553,12 +581,12 @@ clin |>
 
 the `!` operator means *not* 
 
-`is.na()` identifies null values
-
-`case_when` generalize `ifelse` to more than two categories
+`is.na()` identifies unavailable values
 
 ```{r}
-#| label: a19
+#| label: TP5vo6Kr
+#| output-location: column-fragment
+#| code-line-numbers: "|4|"
 clin |> 
   mutate(
     metastatic = ifelse(
@@ -576,8 +604,12 @@ clin |>
 
 with multiple conditions, `case_when()` is much easier!
 
+. . .
+
 ```{r}
-#| label: a20
+#| label: wuzuz8p1
+#| output-location: column-fragment
+#| code-line-numbers: "|3-9|"
 clin |> 
   mutate(
     t = case_when(
@@ -586,10 +618,8 @@ clin |>
       ajcc_pathologic_t %in% c("T3", "T3a") ~ "T3",
       ajcc_pathologic_t %in% c("T4", "T4b", "T4d") ~ "T4",
       ajcc_pathologic_t == "TX" ~ NA,
-      TRUE ~ ajcc_pathologic_t
     )
-  ) |>
-  select(t, ajcc_pathologic_t)
+  ) |> select(t, ajcc_pathologic_t)
 ```
 
 ---
@@ -599,7 +629,9 @@ clin |>
 Here is real-life code
 
 ```{r}
-#| label: a21
+#| label: clZFLjHk
+#| eval: false
+#| code-line-numbers: "|8,9"
 clin |> 
   mutate(
     t = case_when(
@@ -607,7 +639,7 @@ clin |>
       str_starts(ajcc_pathologic_t, "T2") ~ "T2",
       str_starts(ajcc_pathologic_t, "T3") ~ "T3",
       str_starts(ajcc_pathologic_t, "T4") ~ "T4",
-      ajcc_pathologic_t == "TX" ~ NA,
+      ajcc_pathologic_t == "TX" ~ NA_character_,
       TRUE ~ ajcc_pathologic_t
     )
   ) |>
@@ -620,8 +652,10 @@ clin |>
 Here is real-life code
 
 ```{r}
-#| label: a22
-genes <- genes %>%
+#| label: VXXgRndA
+#| output-location: column-fragment
+#| code-line-numbers: "|3-9"
+genes %>%
   mutate(
     full_gene_name = AnnotationDbi::mapIds(
       org.Hs.eg.db::org.Hs.eg.db,
@@ -630,12 +664,11 @@ genes <- genes %>%
       keytype = "SYMBOL",
       multiVals = "first"
     )
-  )
-
-  genes |> select(
-    gene_name,
-    full_gene_name
-  )
+  ) |>
+  select(
+      gene_name,
+      full_gene_name
+    )
 ```
 
 ---
@@ -649,37 +682,66 @@ genes <- genes %>%
 . . .
 
 ```{r}
-#| label: a23
-courses |> 
- group_by(dept, semester) |>
-  summarize(
-    enr = sum(enrollment)
-  )
+#| label: XCq9HEtL
+#| output-location: column-fragment
+#| code-line-numbers: "|2-15|3-9|10-14|16-21|16|17-21|18|19|20"
+clin |> 
+  mutate(
+    t = case_when(
+      str_starts(ajcc_pathologic_t, "T1") ~ "T1",
+      str_starts(ajcc_pathologic_t, "T2") ~ "T2",
+      str_starts(ajcc_pathologic_t, "T3") ~ "T3",
+      str_starts(ajcc_pathologic_t, "T4") ~ "T4",
+      TRUE ~ NA_character_
+    ),
+    m = case_when(
+      ajcc_pathologic_m == "M1" ~ "M1",
+      ajcc_pathologic_m %in% c("M0", "cM0 (i+)") ~ "M0",
+      TRUE ~ NA_character_
+    )
+  )|>
+  group_by(t, m) |>
+    summarize(
+      count = n(),
+      days_to_death = mean(days_to_death),
+      certainty = sd(days_to_death)
+    )
 ```
 
 ---
 
 ## Group by / summarize
 
-useful arguments within `summarize`: 
-
-`mean`, `median`, `sd`, `min`, `max`, `n`
-
 ```{r}
-#| label: a24
-courses |> 
-  group_by(dept, semester) |>
-  summarize(
-    enr = sum(enrollment),
-    count = n_distinct(course_id)
-  )
+#| label: Xtq9HEtL
+#| output-location: column-fragment
+#| code-line-numbers: "16|20,21|"
+clin |> 
+  mutate(
+    t = case_when(
+      str_starts(ajcc_pathologic_t, "T1") ~ "T1",
+      str_starts(ajcc_pathologic_t, "T2") ~ "T2",
+      str_starts(ajcc_pathologic_t, "T3") ~ "T3",
+      str_starts(ajcc_pathologic_t, "T4") ~ "T4",
+      TRUE ~ NA_character_
+    ),
+    m = case_when(
+      ajcc_pathologic_m == "M1" ~ "M1",
+      ajcc_pathologic_m %in% c("M0", "cM0 (i+)") ~ "M0",
+      TRUE ~ NA_character_
+    )
+  )|>
+  tidyr::drop_na(t,m) |>
+  group_by(t, m) |>
+    summarize(
+      count = n(),
+      days_to_death = mean(days_to_death, na.rm = TRUE),
+    ) |>
+  arrange(desc(days_to_death)) -> clin_summary
 ```
 
-# Using R effectively
 
-::: {.numbers}
-[1 2]{style="opacity:0.25"} 3 [4 5 6]{style="opacity:0.25"}
-:::
+# Using R effectively
 
 ---
 
@@ -716,11 +778,10 @@ courses |>
 packages need to be installed on each computer you use
 
 ```{r}
-#| label: a25
+#| label: JY64vXjQ
 #| eval: false
-install.packages("tidyverse") # <1>
+install.packages("tidyverse") # only need to do this once (per computer)
 ```
-1. only need to do this once (per computer)
 
 . . .
 
@@ -744,13 +805,12 @@ They can be installed as follows:
 ```{r} 
 #| label: a26
 #| eval: false
-if (!require("BiocManager", quietly = TRUE)) # <1>
-    install.packages("BiocManager") # <1>
+#| code-line-numbers: "1,2|4"
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
-BiocManager::install("limma") # <2>
+BiocManager::install("limma")
 ```
-1. Install the Bioconductor installer like any other package
-2. Install packages hosted on Bioconductor
 
 . . .
 
@@ -768,44 +828,15 @@ Journals and regulatory bodies don't allow the use of arbitrary packages in subm
 
 ---
 
-## Working with packages
-
-<br>
-
-packages need to be loaded/attached with `library()` at the beginning of every session
-
-```{r}
-#| label: a27
-#| eval: false
-# always put the necessary packages at the top of a code file
-library(tidyverse)
-```
-
-<br>
-
-::: {.fragment}
-can access help files by typing `??tidyverse` or `??mutate` in the console
-:::
-
----
-
 ## Organizing with projects
 
-<br>
-
 [**highly**]{style="color: #cc0000"} recommend using *projects* to stay organized
-
-<br>
 
 keeps code files and data files together, allowing for easier file path navigation and better reproducible work habits
 
 . . .
 
-<br>
-
 `File -> New Project`
-
-<br>
 
 more guidance: [here](https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects) and [here](https://r4ds.had.co.nz/workflow-projects.html#rstudio-projects)
 
@@ -816,7 +847,7 @@ more guidance: [here](https://support.posit.co/hc/en-us/articles/200526207-Using
 use `read_csv()` to import a csv file
 
 ```{r}
-#| label: a28
+#| label: rYyx53zA
 #| eval: false
 # the file path is this simple if you use projects!
 # ?read_csv() in the console will bring up the help file with more options
@@ -833,7 +864,7 @@ the [readxl](https://readxl.tidyverse.org/) package is helpful for Excel files
 
 
 ```{r}
-#| label: a29
+#| label: WLXniAx2
 #| eval: false
 # needs to be loaded but not installed as it's part of the tidyverse
 library(readxl)
@@ -853,6 +884,7 @@ Most biological databases offer R packages that automate data retrieval.
 ```{r} 
 #| label: a30
 #| eval: false
+#| code-line-numbers: "1|3-8|10|11"
 library(TCGAbiolinks) # <1>
 
 query <- GDCquery( # <2>
@@ -870,361 +902,17 @@ assay <- GDCprepare(query) # <4>
 3. Download the queried data to your computer.
 4. Transform and import the downloaded data to a suitable format.
 
-# More data manipulation
-
-::: {.numbers}
-[1 2 3]{style="opacity:0.25"} 4 [5 6]{style="opacity:0.25"}
-:::
-
----
-
-## Stringr functions
-
-functions from `stringr` (which all start with `str_`) are useful for working with text data
-
-```{r}
-#| label: a31
-faculty |> 
-  filter(str_detect(rank, "Professor"))
-```
-
----
-
-## Stringr functions
-
-cheat sheet of functions is [here](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
-
-```{r}
-#| label: a32
-courses |> 
- mutate(year = str_c(str_sub(semester, 1, 4),
-                      "-",
-                     str_sub(semester, 5, 6))) |>
- select(semester, year) |>
-  unique()
-```
-
----
-
-## Pivoting data
-
-existing `faculty` data has one row per faculty, some with multiple departments (sometimes known as *wide* data)
-
-```{r}
-#| label: a33
-#| echo: false
-faculty
-```
-
----
-
-## Pivoting data
-
-what if you instead want one row per faculty *per department*? (sometimes known as *long* data)
-
-::: {style="font-size: 0.75em"}
-```{r}
-#| label: a34
-#| echo: false
-faculty |> 
-  pivot_longer(dept1:dept2,
-               names_to = "dept_no",
-               values_to = "dept",
-               values_drop_na = TRUE)
-```
-:::
-
----
-
-## Pivoting data
-
-the `pivot_longer` function lengthens data
-
-```{r}
-#| label: a35
-faculty |> 
-  pivot_longer(dept1:dept2,
-               names_to = "dept_no",
-               values_to = "dept",
-              values_drop_na = TRUE) |>
-  select(-year, -rank)
-```
-
----
-
-## Pivoting data
-
-and `pivot_wider` does the opposite!
-
-```{r}
-#| label: a36
-#| echo: false
-courses |> head(2)
-```
-
-. . .
-
-```{r}
-#| label: a37
-courses |> 
-  pivot_wider(names_from = "level",
-              values_from = "enrollment")
-```
-
----
-
-## Joining data
-
-R has many useful functions for handling [relational data]{style="color: #cc0000"}
-
-all you need is at least one [key variable]{style="color: #cc0000"} that connects data sets
-
-`left_join` is most common, but there are [more](https://r4ds.had.co.nz/relational-data.html)
-
----
-
-## Joining data
-
-what's the average UG enrollment per year, per faculty rank?
-
-. . .
-
-::: {style="text-align: center"}
-`faculty`
-:::
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a38
-#| echo: false
-reactable(faculty |> head(4))
-```
-:::
-
-::: {style="text-align: center"}
-`courses`
-:::
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a39
-#| echo: false
-reactable(courses |> head(4))
-```
-:::
-
-. . .
-
-::: {style="text-align: center"}
-`faculty$id` is the same as `courses$faculty_id`
-:::
-
----
-
-## Joining data
-
-<br>
-
-what's the average [UG enrollment per year, per faculty]{style="color: #cc0000"} rank?
-
-<br>
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a40
-#| echo: false
-reactable(courses |> head(5))
-```
-:::
-
-. . .
-
-- filter to `UG` courses only
-- create our `year` variable again 
-- summarize `enrollment` by `year` and `faculty_id`
-
----
-
-## Joining data
-
-<br>
-
-use the `<-` operator to create a new data frame `courses_UG`
-
-```{r}
-#| label: a41
-#| eval: false
-#| code-line-numbers: "1"
-courses_UG <- courses |> 
- filter(level == "UG") |>
- mutate(year = str_c(str_sub(semester, 1, 4),
-                      "-",
-                      str_sub(semester, 5, 6)))
-```
-
----
-
-## Joining data
-
-<br>
-
-`filter` to undergraduate courses only and `mutate` a new academic year variable
-
-```{r}
-#| label: a42
-#| eval: false
-#| code-line-numbers: "2-5"
-courses_UG <- courses |> 
- filter(level == "UG") |>
- mutate(year = str_c(str_sub(semester, 1, 4),
-                      "-",
-                      str_sub(semester, 5, 6)))
-```
-
----
-
-## Joining data
-
-<br>
-
-`group_by` year and faculty member; `summarize` enrollment
-
-```{r}
-#| label: a43
-#| code-line-numbers: "6-7"
-courses_UG <- courses |> 
- filter(level == "UG") |>
- mutate(year = str_c(str_sub(semester, 1, 4),
-                      "-",
-                     str_sub(semester, 5, 6))) |>
- group_by(year, faculty_id) |>
-  summarize(enr = sum(enrollment))
-```
-
-. . .
-
-<br>
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a44
-#| echo: false
-reactable(courses_UG |> head(4))
-```
-:::
-
----
-
-## Joining data
-
-<br>
-
-what's the average UG enrollment per year, per faculty rank?
-
-::: columns
-::: {.column width="60%"}
-::: {style="text-align: center"}
-`faculty`
-:::
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a45
-#| echo: false
-reactable(faculty)
-```
-:::
-:::
-
-::: {.column width="40%"}
-::: {style="text-align: center"}
-`courses_UG`
-:::
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a46
-#| echo: false
-reactable(courses_UG |> arrange(desc(year)))
-```
-:::
-:::
-:::
-
----
-
-## Joining data
-
-<br>
-
-```{r}
-#| label: a47
-fac_enr <- faculty |>
-  left_join(courses_UG, by = c("id" = "faculty_id",
-                               "year" = "year"))
-```
-
-1. `fac_enr`: new data frame
-2. `faculty`: data frame you're adding data to
-3. `courses_UG`: data frame where the new data is coming from
-
-. . .
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a48
-#| echo: false
-reactable(fac_enr)
-```
-:::
-
----
-
-## Joining data
-
-<br>
-
-what's the average UG enrollment per year, per faculty rank?
-
-```{r}
-#| label: a49
-#| code-line-numbers: "4-5"
-fac_enr <- faculty |> 
-  left_join(courses_UG, by = c("id" = "faculty_id",
-                              "year" = "year")) |>
- group_by(year, rank) |>
-  summarize(avg_enr = mean(enr, na.rm = TRUE))
-```
-
-. . .
-
-<br>
-
-::: {style="font-size: 0.45em"}
-```{r}
-#| label: a50
-#| echo: false
-reactable(fac_enr |> arrange(desc(year)))
-```
-:::
-
 # Data visualization
-
-::: {.numbers}
-[1 2 3 4]{style="opacity:0.25"} 5 [6]{style="opacity:0.25"}
-:::
 
 ## ggplot2
 
-<br>
-
 `ggplot2` is the data visualization package that is loaded with the `tidyverse`
 
-<br>
+. . .
 
 the [g]{style="color:#cc0000"}rammar of [g]{style="color:#cc0000"}raphics maps data to the aesthetic attributes of geometric points
 
 . . .
-
-<br>
 
 encoding data into visual cues (e.g., length, color, position, size) is how we signify changes and comparisons
 
@@ -1233,29 +921,13 @@ encoding data into visual cues (e.g., length, color, position, size) is how we s
 ## Bar chart
 
 ```{r}
-#| label: a51
-#| code-line-numbers: "1-2|3|4"
-#| eval: false
-faculty |>
-  count(rank) |>
-  ggplot(aes(x = rank, y = n)) +
-  geom_bar(stat = "identity")
-```
-
-. . .
-
-to combine lines into one code chunk, use `+` instead of `|>`
-
-. . .
-
-```{r}
-#| label: a52
-#| echo: false
-#| fig-height: 4
+#| label: vTNYTAcP
+#| output-location: column-fragment
 #| fig-align: "center"
-faculty |>
-  count(rank) |>
-  ggplot(aes(x = rank, y = n)) +
+#| code-line-numbers: "1,2|3|4"
+clin_summary |>
+  ggplot() +
+  aes(x = m, y = days_to_death) +
   geom_bar(stat = "identity")
 ```
 
@@ -1266,76 +938,25 @@ faculty |>
 can create a prettier plot pretty easily
 
 ```{r}
-#| label: a53
-#| code-fold: true
-#| code-summary: "expand for full code"
+#| label: OfWrTjpQ
 #| fig-align: "center"
-faculty |>
-  count(rank) |>
-  ggplot(aes(x = reorder(rank, -n), y = n)) +
-  geom_bar(stat = "identity", fill = "#cc0000") +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-  geom_text(aes(label = n), vjust = -0.5) +
-  labs(x = NULL, y = NULL,
-       title = "Count of faculty by rank, 2018-2021") +
+#| output-location: column-fragment
+#| code-line-numbers: "1,2|3|4|5|6-9|10|11|12-15|13|14|"
+clin_summary |>
+  ggplot() +
+  aes(x = reorder(m, -days_to_death), y = days_to_death) +
+  geom_bar(stat = "identity", fill = "#2C7BB6") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(
+    title = "Average Days Until Death by metastasis (TCGA)",
+    x = "M Status"
+  ) +
+  coord_flip()+
   theme_linedraw() +
-  theme(panel.grid.major.x = element_blank(),
-        axis.ticks = element_blank())
-```
-
----
-
-## Line graph
-
-<br>
-
-```{r}
-#| label: a54
-#| code-line-numbers: "1-2|3|4"
-#| eval: false
-fac_enr |> 
- filter(!is.na(avg_enr)) |>
-  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
-  geom_line()
-```
-
-. . .
-
-```{r}
-#| label: a55
-#| echo: false
-#| fig-height: 4
-#| fig-align: "center"
-fac_enr |> 
- filter(!is.na(avg_enr)) |>
-  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
-  geom_line()
-```
-
----
-
-## Line graph
-
-```{r}
-#| label: a56
-#| code-fold: true
-#| code-summary: "expand for full code"
-#| fig-align: "center"
-fac_enr |> 
- filter(!is.na(avg_enr)) |>
-  ggplot(aes(x = year, y = avg_enr, group = rank, color = rank)) +
-  geom_line() +
-  geom_point() +
-  scale_color_brewer(type = "qual", palette = "Dark2") +
-  labs(x = NULL, y = "Average enrollment",
-       title = "Average undergraduate enrollment per rank over time") +
-  theme_linedraw() +
-  theme(panel.grid.major.x = element_blank(),
-        axis.ticks = element_blank(),
-        legend.title = element_blank(),
-        legend.background = element_rect(fill = NA),
-        legend.key = element_rect(fill = NA),
-        legend.position = c(0.85, 0.82))
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.ticks = element_blank()
+  )
 ```
 
 ---
@@ -1344,77 +965,41 @@ fac_enr |>
 
 from [R for Data Science](https://r4ds.had.co.nz/data-visualisation.html)
 
-<br>
-
 [Data Visualization: a practical introduction](https://socviz.co/index.html#preface)
-
-<br>
-
-creating [custom themes](https://themockup.blog/posts/2020-12-26-creating-and-using-custom-ggplot2-themes/)
-
-<br>
 
 the [ggplot2 book](https://ggplot2-book.org/)
 
-<br>
-
 the [R graph gallery](https://r-graph-gallery.com/index.html)
 
----
+# Other topics
 
-## Putting it all together
+## R Markdown / Quarto
 
-<br>
-
-with what we've done so far, your `.R` file could:
-
-::: {.incremental}
-- import your data files
-- [document all data cleaning and preparation steps and decisions]{style="color:#cc0000"}
-- produce a PPT-ready graphic summarizing your results
-:::
+Programs that combine **Markdown** and executable code
 
 . . .
-
-::: {style="text-align: center"}
-**and that file would make it extremely easy for you or someone else to reproduce this analysis with new data in six months**
-:::
-
-# Advanced topics
-
-::: {.numbers}
-[1 2 3 4 5]{style="opacity:0.25"} 6
-:::
-
-## R Markdown
-
-<br>
-
-using RStudio, create `.Rmd` documents that combine text, code, and graphics
-
-. . .
-
-<br>
-
-many output formats: html, pdf, Word, slides
-
-. . .
-
-<br>
 
 exceedingly useful for [parameterized reporting]{style="color:#cc0000"}: can create an R-based PDF report and generate it automatically for, say, each department
+
+. . .
+
+| Feature               | RMarkdown     | Quarto                         |
+|-----------------------|---------------|--------------------------------|
+| **Language Support**  | R   | R, Python, Julia, JavaScript   |
+
+. . .
+
+[R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
+
+[Quarto](https://quarto.org/docs/)
 
 ---
 
 ## Internal packages
 
-<br>
-
 you can also create your *own* packages!
 
 . . .
-
-<br>
 
 your package can hold:
 
@@ -1422,31 +1007,13 @@ your package can hold:
 - custom `ggplot2` themes
 - common functions and calculations (and their definitions!)
 
-. . .
-
-<br>
-
-can be stored on a shared drive to facilitate collaboration
-
 ---
 
-## R Markdown and package resources
+## And of course, Statistics
 
-<br>
+[Introduction to Statistical learning](https://statlearning.com)!!!!
 
-**R Markdown**
-
-the official [R Markdown website](https://rmarkdown.rstudio.com/lesson-1.html)
-
-[R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
-
-<br>
-
-**internal packages**
-
-a comprehensive [theoretical explainer](https://emilyriederer.netlify.app/post/team-of-packages/)
-
-a [talk I gave](https://meghan.rbind.io/talk/boston-user/) earlier this year on the topic
+[Fahrmeir's Regression](https://link.springer.com/book/10.1007/978-3-662-63882-8). **EKB ACCESS**
 
 # Learn more about R
 
@@ -1454,21 +1021,33 @@ a [talk I gave](https://meghan.rbind.io/talk/boston-user/) earlier this year on 
 
 [R for Data Science](https://r4ds.had.co.nz/): the ultimate guide
 
-<br>
-
 [R for Excel users](https://rstudio-conf-2020.github.io/r-for-excel/): a very useful workshop
-
-<br>
 
 [STAT 545](https://stat545.com/): an online book on reproducible data analysis in R
 
-<br>
-
-the [RStudio Education](https://education.rstudio.com/) site
-
-<br>
-
 the [Learn `tidyverse`](https://www.tidyverse.org/learn/) site
+
+---
+
+## Resources
+
+[Use R](https://www.springer.com/series/6991/books) textbooks are all accessible via EKB.
+
+[ggplot](https://link.springer.com/book/10.1007/978-3-319-24277-4)
+
+[Data Wrangling with R](https://link.springer.com/book/10.1007/978-3-319-45599-0)
+
+[An Introduction to Data Analysis in R](https://link.springer.com/book/10.1007/978-3-030-48997-7)
+
+[Applied Survival Analysis Using R](https://link.springer.com/book/10.1007/978-3-319-31245-3)
+
+[Epidemics](https://link.springer.com/book/10.1007/978-3-031-12056-5)
+
+[Magnetic Resonance Brain Imaging](https://link.springer.com/book/10.1007/978-3-031-38949-8)
+
+[Chemometrics with R](https://link.springer.com/book/10.1007/978-3-662-62027-4)
+
+---
 
 <!--
 vim: cole=0

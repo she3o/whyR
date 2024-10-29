@@ -1,0 +1,4 @@
+- source: index.qmd
+  quarto-pub:
+    - id: 193dcadb-485e-480e-8272-6e8e35acab9d
+      url: 'https://she3o.quarto.pub/analysis-of-biological-data-with-r'
